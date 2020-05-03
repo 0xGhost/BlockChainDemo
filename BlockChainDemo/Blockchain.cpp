@@ -2,7 +2,10 @@
 
 Blockchain::Blockchain(const unsigned int num) : numOf0(num)
 {
-	chain.emplace_back(Block(0, "StartBlock"));
+	Block b(0, "StartBlock");
+	b.SetPrevHash(string(64, '0'));
+	b.Mine(numOf0);
+	chain.emplace_back(b);
 }
 
 void Blockchain::AddBlock(Block newBlock)
