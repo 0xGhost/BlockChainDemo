@@ -1,4 +1,4 @@
-// Yiang Lu create by 03/05/2020
+// Yiang Lu 03/05/2020
 #pragma once
 #include "Block.h"
 #include <vector>
