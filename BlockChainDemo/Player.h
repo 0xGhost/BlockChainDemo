@@ -1,22 +1,9 @@
 // Yiang Lu 03/05/2020
+#pragma once
+#include <string>
+#include "Transaction.h"
 
-#include <iostream>
-#include <openssl/aes.h>
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <assert.h>
-
-#include "Blockchain.h"
-#include "RSATool.h"
-#include "Player.h"
-
-using namespace std;
-
-string privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"\
+#define DefaultPrivateKey "-----BEGIN RSA PRIVATE KEY-----\n"\
 "MIIEowIBAAKCAQEAy8Dbv8prpJ/0kKhlGeJYozo2t60EG8L0561g13R29LvMR5hy\n"\
 "vGZlGJpmn65+A4xHXInJYiPuKzrKUnApeLZ+vw1HocOAZtWK0z3r26uA8kQYOKX9\n"\
 "Qt/DbCdvsF9wF8gRK0ptx9M6R13NvBxvVQApfc9jB9nTzphOgM4JiEYvlV8FLhg9\n"\
@@ -42,9 +29,9 @@ string privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"\
 "yINRAoGBAJqioYs8rK6eXzA8ywYLjqTLu/yQSLBn/4ta36K8DyCoLNlNxSuox+A5\n"\
 "w6z2vEfRVQDq4Hm4vBzjdi3QfYLNkTiTqLcvgWZ+eX44ogXtdTDO7c+GeMKWz4XX\n"\
 "uJSUVL5+CVjKLjZEJ6Qc2WZLl94xSwL71E41H4YciVnSCQxVc4Jw\n"\
-"-----END RSA PRIVATE KEY-----\n\0";
+"-----END RSA PRIVATE KEY-----\n\0"
 
-string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
+#define DefaultPublicKey "-----BEGIN PUBLIC KEY-----\n"\
 "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy8Dbv8prpJ/0kKhlGeJY\n"\
 "ozo2t60EG8L0561g13R29LvMR5hyvGZlGJpmn65+A4xHXInJYiPuKzrKUnApeLZ+\n"\
 "vw1HocOAZtWK0z3r26uA8kQYOKX9Qt/DbCdvsF9wF8gRK0ptx9M6R13NvBxvVQAp\n"\
@@ -52,49 +39,27 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 "i6T4nNq7NWC+UNVjQHxNQMQMzU6lWCX8zyg3yH88OAQkUXIXKfQ+NkvYQ1cxaMoV\n"\
 "PpY72+eVthKzpMeyHkBn7ciumk5qgLTEJAfWZpe4f4eFZj/Rc8Y8Jj2IS5kVPjUy\n"\
 "wQIDAQAB\n"\
-"-----END PUBLIC KEY-----\n";
+"-----END PUBLIC KEY-----\n"
 
-int main()
+using std::string;
+
+class Player
 {
-	std::string plainText = "My secret message.\n";
-	char* signature = RSATool::SignMessage(privateKey, plainText);
-	bool authentic = RSATool::VerifySignature(publicKey, "My secret message.\n", signature);
-	if (authentic) {
-		std::cout << "Authentic" << std::endl;
-	}
-	else {
-		std::cout << "Not Authentic" << std::endl;
-	}
+	class RSA;
+public:
+	Player(string name, string privateKey = DefaultPrivateKey, string publicKey = DefaultPublicKey)
+		:name(name), privateKey(privateKey), publicKey(publicKey) {}
 
+	void Sign(Transaction& t);
+	string GetPublicKey() { return publicKey; }
+	string GetName() { return name; }
 
-	Player alice("Alice");
-	Player bob("Bob");
-	Player john("John");
+private:
+	string name;
+	//RSA* rsa;
+	string privateKey;
+	string publicKey;
 
-	Transaction t1(&alice, &bob, "Sword");
-	alice.Sign(t1);
-	Transaction t2(&bob, &alice, "Gem");
-	bob.Sign(t2); 
-	Transaction t3(&bob, &john, "Sword");
-	bob.Sign(t3);
+	char* GenerateSignature(string message);
+};
 
-	cout << "Creating the chain and mining block 0..." << endl;
-	Blockchain blockChain = Blockchain(4);
-	cout << blockChain.GetChain().back() << endl;
-
-	cout << "Mining block 1..." << endl;
-	blockChain.AddBlock(Block(1, t1));
-	cout << blockChain.GetChain().back() 
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
-
-	cout << "Mining block 2..." << endl;
-	blockChain.AddBlock(Block(2, t2));
-	cout << blockChain.GetChain().back()
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
-
-
-	cout << "Mining block 3..." << endl;
-	blockChain.AddBlock(Block(3, t3));
-	cout << blockChain.GetChain().back()
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
-}

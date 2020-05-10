@@ -3,19 +3,30 @@
 #include <string>
 
 using std::string;
-
+class Player;
 class Transaction
 {
 public:
 	Transaction() {}
-	Transaction(string oldOwner, string newOwner, string item) : oldOwner(oldOwner), newOwner(newOwner), item(item) {}
-	//Transaction(User& oldOwner, User& newOwner, Item& item);
-	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
-private:
-	string oldOwner;
-	string newOwner;
-	string item;
+	Transaction(Player* oldOwner, Player* newOwner, string item);
+		
 
-	//string signature;
+	bool Verify() const;
+
+	Player* GetOldOwner()	const	{ return oldOwner; }
+	Player* GetNewOwner()	const	{ return newOwner; }
+	string	GetItem()		const	{ return item; }
+
+	string GetMessage() const;
+
+	void SetSignature(char* s) { signature = s; }
+
+	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
+
+private:
+	Player *oldOwner;
+	Player *newOwner;
+	string item;
+	char* signature;
 };
 

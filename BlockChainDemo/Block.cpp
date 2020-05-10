@@ -19,7 +19,7 @@ void Block::Mine(const unsigned int numOf0)
 		++nonce;
 		std::stringstream sstr;
 		string blockStr;
-		sstr << index << nonce << data << prevHash << timeStamp;
+		sstr << index << nonce << data.GetMessage() << prevHash << timeStamp;
 		sstr >> blockStr;
 		hash = sha256(blockStr);
 	}
@@ -30,7 +30,7 @@ bool Block::Verify(const unsigned int numOf0) const
 	string target(numOf0, '0');
 	std::stringstream sstr;
 	string blockStr;
-	sstr << index << nonce << data << prevHash << timeStamp;
+	sstr << index << nonce << data.GetMessage() << prevHash << timeStamp;
 	sstr >> blockStr;
 	string hash = sha256(blockStr);
 	return hash.compare(0, numOf0, target) == 0;
