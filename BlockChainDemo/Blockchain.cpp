@@ -3,7 +3,7 @@
 
 Blockchain::Blockchain(const unsigned int num) : numOf0(num)
 {
-	Block b(0, Transaction());
+	Block b(0);
 	b.SetPrevHash(string(64, '0'));
 	b.Mine(numOf0);
 	chain.emplace_back(b);

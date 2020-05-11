@@ -2,22 +2,25 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <vector>
 #include "Transaction.h"
 
 using std::string;
+using std::vector;
 
 class Block
 {
 public:
-	Block(const unsigned int index, const Transaction& data);
+	Block(const unsigned int index);
 
 	void Mine(const unsigned int numOf0);
 	bool Verify(const unsigned int numOf0) const;
 
+	void AddTransaction(const Transaction t);
 	unsigned int GetIndex() const	{ return index; }
 	time_t GetTimeStamp()	const	{ return timeStamp; }
 	long long GetNonce()	const	{ return nonce; }
-	Transaction GetData()		const	{ return data; }
+	vector<Transaction> GetData()		const	{ return data; }
 	string GetHash()		const	{ return hash; }
 	string GetPrevHash()	const	{ return prevHash; }
 
@@ -28,10 +31,11 @@ private:
 	unsigned int index;
 	time_t timeStamp;
 	long long nonce;
-	Transaction data; // TODO: struct? class with GetHash()?
+	vector<Transaction> data; // TODO: vector
 	string prevHash;
 	string hash;
 
-	// TODO: protected string CombineBlockString() const;
+
+	string CombineBlockString() const;
 };
 

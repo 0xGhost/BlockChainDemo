@@ -56,17 +56,6 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 
 int main()
 {
-	std::string plainText = "My secret message.\n";
-	char* signature = RSATool::SignMessage(privateKey, plainText);
-	bool authentic = RSATool::VerifySignature(publicKey, "My secret message.\n", signature);
-	if (authentic) {
-		std::cout << "Authentic" << std::endl;
-	}
-	else {
-		std::cout << "Not Authentic" << std::endl;
-	}
-
-
 	Player alice("Alice");
 	Player bob("Bob");
 	Player john("John");
@@ -83,18 +72,28 @@ int main()
 	cout << blockChain.GetChain().back() << endl;
 
 	cout << "Mining block 1..." << endl;
-	blockChain.AddBlock(Block(1, t1));
+	Block b1(1);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t3);
+	blockChain.AddBlock(b1);
 	cout << blockChain.GetChain().back() 
 		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
 
 	cout << "Mining block 2..." << endl;
-	blockChain.AddBlock(Block(2, t2));
+	Block b2(2);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	blockChain.AddBlock(b2);
 	cout << blockChain.GetChain().back()
 		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
 
 
 	cout << "Mining block 3..." << endl;
-	blockChain.AddBlock(Block(3, t3));
+	Block b3(3);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	blockChain.AddBlock(b3);
 	cout << blockChain.GetChain().back()
 		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
 }

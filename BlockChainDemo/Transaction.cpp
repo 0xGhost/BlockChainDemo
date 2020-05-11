@@ -36,7 +36,7 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 	}
 	else
 	{
-		out << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << ".  Authentic: " << std::boolalpha <<  t.Verify();
+		out << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << ".  Authentic: " << std::boolalpha << t.Verify();// << "\nSignature:" << t.signature;
 	}
 	return out;
 }
