@@ -7,7 +7,7 @@ class Player;
 class Transaction
 {
 public:
-	Transaction() {}
+	Transaction() { item = ""; }
 	Transaction(Player* oldOwner, Player* newOwner, string item);
 		
 
@@ -24,8 +24,8 @@ public:
 	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
 
 private:
-	Player *oldOwner;
-	Player *newOwner;
+	Player *oldOwner = nullptr;
+	Player *newOwner = nullptr;
 	string item;
 	char* signature;
 };

@@ -3,15 +3,15 @@
 
 Blockchain::Blockchain(const unsigned int num) : numOf0(num)
 {
-	Block b(0);
-	b.SetPrevHash(string(64, '0'));
-	b.Mine(numOf0);
-	chain.emplace_back(b);
+	Block *b = new Block(0);
+	b->SetPrevHash(string(64, '0'));
+	b->Mine(numOf0);
+	chain.push_back(b);
 }
 
-void Blockchain::AddBlock(Block newBlock)
+void Blockchain::AddBlock(Block* newBlock)
 {
-	newBlock.SetPrevHash(chain.back().GetHash());
-	newBlock.Mine(numOf0);
+	newBlock->SetPrevHash(chain.back()->GetHash());
+	newBlock->Mine(numOf0);
 	chain.push_back(newBlock);
 }

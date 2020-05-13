@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Blockchain Copies">
+      <UniqueIdentifier>{744655a1-a1d0-4b60-a6fe-1dbed87c0fcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BlockChainDemo.cpp">
@@ -56,5 +59,16 @@
     <ClInclude Include="RSATool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Alice_copy.txt">
+      <Filter>Blockchain Copies</Filter>
+    </Text>
+    <Text Include="Bob_copy.txt">
+      <Filter>Blockchain Copies</Filter>
+    </Text>
+    <Text Include="John_copy.txt">
+      <Filter>Blockchain Copies</Filter>
+    </Text>
   </ItemGroup>
 </Project>

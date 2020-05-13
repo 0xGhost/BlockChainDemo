@@ -170,6 +170,11 @@
     <ClInclude Include="SHA256.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Alice_copy.txt" />
+    <Text Include="Bob_copy.txt" />
+    <Text Include="John_copy.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

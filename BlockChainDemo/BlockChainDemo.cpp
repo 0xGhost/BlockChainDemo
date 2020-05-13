@@ -1,6 +1,7 @@
 // Yiang Lu 03/05/2020
 
 #include <iostream>
+#include <fstream>
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
@@ -56,9 +57,15 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 
 int main()
 {
+	vector<Player*> players;
+
 	Player alice("Alice");
 	Player bob("Bob");
 	Player john("John");
+
+	players.push_back(&alice);
+	players.push_back(&bob);
+	players.push_back(&john);
 
 	Transaction t1(&alice, &bob, "Sword");
 	alice.Sign(t1);
@@ -67,33 +74,64 @@ int main()
 	Transaction t3(&bob, &john, "Sword");
 	bob.Sign(t3);
 
-	cout << "Creating the chain and mining block 0..." << endl;
-	Blockchain blockChain = Blockchain(4);
-	cout << blockChain.GetChain().back() << endl;
+	
 
-	cout << "Mining block 1..." << endl;
-	Block b1(1);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t3);
-	blockChain.AddBlock(b1);
-	cout << blockChain.GetChain().back() 
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
+	string input;
 
-	cout << "Mining block 2..." << endl;
-	Block b2(2);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	blockChain.AddBlock(b2);
-	cout << blockChain.GetChain().back()
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
+	cout << "initial blockchain demo? y/n: ";
+	cin >> input;
+
+	if (input == "y" || input == "Y")
+	{
+
+		cout << "Creating the chain and mining block 0..." << endl;
+		Blockchain blockChain(4);
+		cout << *(blockChain.GetChain().back()) << endl;
+
+		cout << "Mining block 1..." << endl;
+		Block b1(1);
+		b1.AddTransaction(t1);
+		b1.AddTransaction(t2);
+		b1.AddTransaction(t3);
+		blockChain.AddBlock(&b1);
+		cout << *(blockChain.GetChain().back())
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
+
+		cout << "Mining block 2..." << endl;
+		Block b2(2);
+		b2.AddTransaction(t2);
+		b2.AddTransaction(t3);
+		blockChain.AddBlock(&b2);
+		cout << *(blockChain.GetChain().back())
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
 
 
-	cout << "Mining block 3..." << endl;
-	Block b3(3);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	blockChain.AddBlock(b3);
-	cout << blockChain.GetChain().back()
-		<< "Block verify: " << blockChain.GetChain().back().Verify(4) << endl << endl;
+		cout << "Mining block 3..." << endl;
+		Block b3(3);
+		b3.AddTransaction(t1);
+		b3.AddTransaction(t2);
+		blockChain.AddBlock(&b3);
+		cout << *(blockChain.GetChain().back())
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
+
+		cout << "Saving copies of blockchain to players\n";
+		ofstream outputFile;
+		for (const Player* player : players)
+		{
+			outputFile.open(player->GetName() + "_copy.txt");
+			if (outputFile.is_open())
+			{
+				for (const Block* b : blockChain.GetChain())
+					outputFile << *b << endl;
+			}
+			else
+			{
+				cout << player->GetName() + " file save failed\n";
+			}
+			outputFile.close();
+		}
+	}
+
+
+
 }

@@ -50,9 +50,9 @@ public:
 	Player(string name, string privateKey = DefaultPrivateKey, string publicKey = DefaultPublicKey)
 		:name(name), privateKey(privateKey), publicKey(publicKey) {}
 
-	void Sign(Transaction& t);
-	string GetPublicKey() { return publicKey; }
-	string GetName() { return name; }
+	void Sign(Transaction& t) const;
+	string GetPublicKey() const { return publicKey; }
+	string GetName() const { return name; }
 
 private:
 	string name;
@@ -60,6 +60,6 @@ private:
 	string privateKey;
 	string publicKey;
 
-	char* GenerateSignature(string message);
+	char* GenerateSignature(string message) const;
 };
 
