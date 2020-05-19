@@ -5,7 +5,7 @@ hash: 0000b26d5ba0270e7bc72610ba1d7ce197355fa22989a57c959b845961940310
 
 index: 1 timeStamp: 0 nonce: 182084
 data:
-Tx: Alice gives Sword to Bob    Authentic: true
+Tx: Alice gives Sord to Bob    Authentic: true
 Tx: Bob gives Gem to Alice    Authentic: true
 Tx: Bob gives Sword to John    Authentic: true
 prev: 0000b26d5ba0270e7bc72610ba1d7ce197355fa22989a57c959b845961940310

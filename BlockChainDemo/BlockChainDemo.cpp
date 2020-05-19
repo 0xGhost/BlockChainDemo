@@ -55,6 +55,8 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 "wQIDAQAB\n"\
 "-----END PUBLIC KEY-----\n";
 
+#define NOZ 4 // num of zero for the hash
+
 int main()
 {
 	vector<Player*> players;
@@ -85,7 +87,7 @@ int main()
 	{
 
 		cout << "Creating the chain and mining block 0..." << endl;
-		Blockchain blockChain(4);
+		Blockchain blockChain(NOZ);
 		cout << *(blockChain.GetChain().back()) << endl;
 
 		cout << "Mining block 1..." << endl;
@@ -95,7 +97,7 @@ int main()
 		b1.AddTransaction(t3);
 		blockChain.AddBlock(&b1);
 		cout << *(blockChain.GetChain().back())
-			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(NOZ) << endl << endl;
 
 		cout << "Mining block 2..." << endl;
 		Block b2(2);
@@ -103,7 +105,7 @@ int main()
 		b2.AddTransaction(t3);
 		blockChain.AddBlock(&b2);
 		cout << *(blockChain.GetChain().back())
-			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(NOZ) << endl << endl;
 
 
 		cout << "Mining block 3..." << endl;
@@ -112,7 +114,7 @@ int main()
 		b3.AddTransaction(t2);
 		blockChain.AddBlock(&b3);
 		cout << *(blockChain.GetChain().back())
-			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
+			<< "Block verify: " << blockChain.GetChain().back()->Verify(NOZ) << endl << endl;
 
 		cout << "Saving copies of blockchain to players\n";
 		
@@ -142,13 +144,19 @@ int main()
 		if (inputFile.is_open())
 		{
 			cout << "\n\n            /****** Reading blockchain copy from " + player->GetName() + " file *******/" << endl;
-			Blockchain bc(4);
+			Blockchain bc(NOZ);
 			inputFile >> bc;
 			inputFile >> std::ws;
 			cout << bc;
 			for (Block* b : bc.GetChain())
 			{
-				cout << "Verify block" << b->GetIndex() << ": " << b->Verify(4) << endl;
+				cout << "Verify block" << b->GetIndex() << ": " << b->Verify(NOZ) << endl;
+				if (!b->Verify(NOZ))
+				{
+					cout << "Remining..." << endl;
+					b->Mine(NOZ);
+					cout << *b;
+				}
 			}
 
 
@@ -163,7 +171,9 @@ int main()
 		inputFile.close();
 	}
 
-
+	cout << "Alice last hash: " << blockchains[0].GetChain().back()->GetHash() << endl;
+	cout << "Bob last hash: " << blockchains[1].GetChain().back()->GetHash() << endl;
+	cout << "John last hash: " << blockchains[2].GetChain().back()->GetHash() << endl;
 
 	return 0;
 }
