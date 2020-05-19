@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 std::istream& operator>>(std::istream& in, Transaction& b)
 {
 	string temp, oldOwnerName, newOwnerName;
-	in >> temp >> oldOwnerName >> temp >> newOwnerName >> temp >> b.item >> temp >> temp;
+	in >> temp >> oldOwnerName >> temp >> b.item >> temp >> newOwnerName >> temp >> temp;
 	b.oldOwner = new Player(oldOwnerName);
 	b.newOwner = new Player(newOwnerName);
 	b.oldOwner->Sign(b); // fake sign

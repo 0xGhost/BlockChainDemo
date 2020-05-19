@@ -141,17 +141,25 @@ int main()
 		inputFile.open(player->GetName() + "_copy.txt");
 		if (inputFile.is_open())
 		{
-			cout << "            /****** Reading blockchain copy from " + player->GetName() + " file *******/" << endl;
+			cout << "\n\n            /****** Reading blockchain copy from " + player->GetName() + " file *******/" << endl;
 			Blockchain bc(4);
 			inputFile >> bc;
 			inputFile >> std::ws;
 			cout << bc;
+			for (Block* b : bc.GetChain())
+			{
+				cout << "Verify block" << b->GetIndex() << ": " << b->Verify(4) << endl;
+			}
+
+
 			blockchains.emplace_back(bc);
 		}
 		else 
 		{
 			cout << player->GetName() + " file read failed\n";
 		}
+
+
 		inputFile.close();
 	}
 
