@@ -115,6 +115,7 @@ int main()
 			<< "Block verify: " << blockChain.GetChain().back()->Verify(4) << endl << endl;
 
 		cout << "Saving copies of blockchain to players\n";
+		
 		ofstream outputFile;
 		for (const Player* player : players)
 		{
@@ -132,6 +133,29 @@ int main()
 		}
 	}
 
+	cout << "/---------------------- distributed demo begin --------------------------/" << endl;
+	vector<Blockchain> blockchains;
+	ifstream inputFile;
+	for (const Player* player : players)
+	{
+		inputFile.open(player->GetName() + "_copy.txt");
+		if (inputFile.is_open())
+		{
+			cout << "            /****** Reading blockchain copy from " + player->GetName() + " file *******/" << endl;
+			Blockchain bc(4);
+			inputFile >> bc;
+			inputFile >> std::ws;
+			cout << bc;
+			blockchains.emplace_back(bc);
+		}
+		else 
+		{
+			cout << player->GetName() + " file read failed\n";
+		}
+		inputFile.close();
+	}
 
 
+
+	return 0;
 }

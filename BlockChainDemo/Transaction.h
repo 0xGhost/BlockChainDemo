@@ -22,6 +22,7 @@ public:
 	void SetSignature(char* s) { signature = s; }
 
 	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
+	friend std::istream& operator>>(std::istream& out, Transaction& b);
 
 private:
 	Player *oldOwner = nullptr;

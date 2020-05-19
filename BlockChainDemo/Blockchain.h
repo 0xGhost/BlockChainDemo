@@ -9,10 +9,14 @@ class Blockchain
 {
 public:
 	Blockchain(const unsigned int num = 0);
-	~Blockchain() { delete chain[0]; }
+	~Blockchain() { }
 
 	void AddBlock(Block* newBlock);
 	const vector<Block*> GetChain() const { return chain; }
+	
+	friend std::ostream& operator<<(std::ostream& out, const Blockchain& bc);
+	friend std::istream& operator>>(std::istream& in, Blockchain& bc);
+
 
 private:
 	vector<Block*> chain;

@@ -7,7 +7,9 @@
 Block::Block(const unsigned int index) : index(index)
 {
 	nonce = 0;
-	timeStamp = time(nullptr);
+	timeStamp = 0;
+	prevBlock = nullptr;
+	//timeStamp = time(nullptr);
 }
 
 void Block::Mine(const unsigned int numOf0)
@@ -40,7 +42,7 @@ string Block::CombineBlockString() const
 	sstr << index << nonce;
 	for (Transaction t : data)
 		sstr << t.GetMessage();
-	sstr << prevHash << timeStamp;
+	sstr << GetPrevHash() << timeStamp;
 	sstr >> blockStr;
 	return blockStr;
 }
@@ -49,13 +51,34 @@ std::ostream& operator<<(std::ostream& out, const Block& b)
 {
 	out << "index: " << b.index << " "
 		<< "timeStamp: " << b.timeStamp << " "
-		<< "nonce: " << b.nonce << "\ndata:\n";
+		<< "nonce: " << b.nonce 
+		<< "\ndata:\n";
 		for (Transaction t : b.data)
 		{
 			out << t << "\n";
 		}
-		
-		out << "prev: " << b.prevHash << "\n"
+		out << "prev: " << b.GetPrevHash() << "\n"
 		<< "hash: " << b.hash << "\n";
 	return out;
+}
+
+std::istream& operator>>(std::istream& in, Block& b)
+{
+	string temp;
+	in >> temp >> b.index
+		>> temp >> b.timeStamp
+		>> temp >> b.nonce >> temp;
+	char a;
+	//in >> a; // skip '\n'
+	a = (in >> std::ws).peek();
+	while ((in >> std::ws).peek() == 'T')
+	{
+		Transaction t;
+		in >> t;
+		b.data.emplace_back(t);
+		//in >> a;
+	}
+	in >> temp >> temp
+		>> temp >> b.hash;
+	return in;
 }

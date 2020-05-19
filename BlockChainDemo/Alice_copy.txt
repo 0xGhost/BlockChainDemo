@@ -1,27 +1,27 @@
-index: 0 timeStamp: 1589364709 nonce: 75352
+index: 0 timeStamp: 0 nonce: 3316
 data:
 prev: 0000000000000000000000000000000000000000000000000000000000000000
-hash: 0000499966058d91e73ea6b9ce23e2af6eded49088d9786e37964691de793de4
+hash: 0000b26d5ba0270e7bc72610ba1d7ce197355fa22989a57c959b845961940310
 
-index: 1 timeStamp: 1589364713 nonce: 152440
+index: 1 timeStamp: 0 nonce: 182084
 data:
-Alice gives Sword to Bob.  Authentic: true
-Bob gives Gem to Alice.  Authentic: true
-Bob gives Sword to John.  Authentic: true
-prev: 0000499966058d91e73ea6b9ce23e2af6eded49088d9786e37964691de793de4
-hash: 00004f58ff6b1d5da9dd54bdf9f0007046061aaa915467a0554ca737d3e5defb
+Tx: Alice gives Sword to Bob    Authentic: true
+Tx: Bob gives Gem to Alice    Authentic: true
+Tx: Bob gives Sword to John    Authentic: true
+prev: 0000b26d5ba0270e7bc72610ba1d7ce197355fa22989a57c959b845961940310
+hash: 00005068b50b0d0c75296b53962e095632fe2352a134dc3183ebb1cb4dde33e3
 
-index: 2 timeStamp: 1589364729 nonce: 8358
+index: 2 timeStamp: 0 nonce: 33389
 data:
-Bob gives Gem to Alice.  Authentic: true
-Bob gives Sword to John.  Authentic: true
-prev: 00004f58ff6b1d5da9dd54bdf9f0007046061aaa915467a0554ca737d3e5defb
-hash: 0000ff7c2b61d4be652bcc6f3126f6c594e4d9a81bed5c4dbcd26673d658f301
+Tx: Bob gives Gem to Alice    Authentic: true
+Tx: Bob gives Sword to John    Authentic: true
+prev: 00005068b50b0d0c75296b53962e095632fe2352a134dc3183ebb1cb4dde33e3
+hash: 00006ad6dee9e7e9b4bf5e86bc959630052fb9f906a1109359ea76ef8939c55a
 
-index: 3 timeStamp: 1589364730 nonce: 38291
+index: 3 timeStamp: 0 nonce: 12313
 data:
-Alice gives Sword to Bob.  Authentic: true
-Bob gives Gem to Alice.  Authentic: true
-prev: 0000ff7c2b61d4be652bcc6f3126f6c594e4d9a81bed5c4dbcd26673d658f301
-hash: 000076e55e04a44ac53cb7f94a68461cff813417756a7cca3dc0e031bd7bbbe9
+Tx: Alice gives Sword to Bob    Authentic: true
+Tx: Bob gives Gem to Alice    Authentic: true
+prev: 00006ad6dee9e7e9b4bf5e86bc959630052fb9f906a1109359ea76ef8939c55a
+hash: 000074db74d3a76519090907f4e98e7e2cd8441ae20dbaa37bcdaee973c779ad
 
