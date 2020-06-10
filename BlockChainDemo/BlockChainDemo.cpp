@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
+
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
@@ -56,6 +58,10 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 "-----END PUBLIC KEY-----\n";
 
 #define NOZ 4 // num of zero for the hash
+
+
+
+
 
 int main()
 {
@@ -171,9 +177,47 @@ int main()
 		inputFile.close();
 	}
 
-	cout << "Alice last hash: " << blockchains[0].GetChain().back()->GetHash() << endl;
+	cout << "\nAlice last hash: " << blockchains[0].GetChain().back()->GetHash() << endl;
 	cout << "Bob last hash: " << blockchains[1].GetChain().back()->GetHash() << endl;
 	cout << "John last hash: " << blockchains[2].GetChain().back()->GetHash() << endl;
+
+	cout << "/****** start voting ******/" << endl;
+	unordered_map<string, int> lastHashCount; 
+	int maxCount = 0;
+	string maxCountLastHash;
+	
+	for (Blockchain bc : blockchains)
+	{
+		string lastHash = bc.GetChain().back()->GetHash();
+		auto search = lastHashCount.find(lastHash);
+		if (search != lastHashCount.end())
+		{
+			lastHashCount[lastHash]++;
+			if (maxCount < lastHashCount[lastHash])
+			{
+				maxCountLastHash = lastHash;
+				maxCount = lastHashCount[lastHash];
+			}
+		}
+		else
+		{
+			lastHashCount[lastHash] = 1;
+		}
+	}
+
+	cout << "voting result: "  << maxCountLastHash << endl;
+
+	cout << "(not implement yet)correct the user file that give the wrong vote? y/n: ";
+	cin >> input;
+
+	if (input == "y" || input == "Y")
+	{
+		// TODO: write the correct copy to the wrong user's file
+	}
+
+	cout << "/****** add new block ******/" << endl;
+
+
 
 	return 0;
 }
