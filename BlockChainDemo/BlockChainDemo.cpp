@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
+#include <thread> 
+#include <mutex>
 
 #include <openssl/aes.h>
 #include <openssl/evp.h>
@@ -59,8 +61,59 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 
 #define NOZ 4 // num of zero for the hash
 
+#define NOM 5 // num of miner
+#define NOB 8 // num of new Block pending
+Blockchain myBlockChain(NOZ);
+int newBlockAdded = 0; // the newest block message boardcast through miners  
+thread miners[NOM];
 
+std::mutex mtx;
 
+void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks);
+
+void minerFunc(const int id, const Blockchain& blockchain, Block** newBlocks)
+{
+	while (newBlockAdded < NOB)
+	{
+		// get copy from newBlocks array
+		Block* newBlock = new Block(*newBlocks[newBlockAdded]);
+		newBlock->SetPrevBlock(*blockchain.GetChain().back());
+		mtx.lock();
+		cout << "miner" << id << " start mining block" << newBlockAdded << endl;
+		mtx.unlock();
+
+	
+		if (newBlock->ThreadingStoppableMine(NOZ, newBlockAdded))
+		{
+			if (mtx.try_lock())
+			{
+				cout << "new block" << newBlockAdded << "  mined. Miner: " << id << endl;
+
+				myBlockChain.AddBlock(newBlock);
+				newBlockAdded++;
+				mtx.unlock();
+			}
+		}
+	}
+}
+
+void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks)
+{
+	cout << "Mining new Block" << newBlockAdded <<" finish. Miner: " + id << endl;
+
+	myBlockChain.AddBlock(newBlock);
+	newBlockAdded++;
+	if (newBlockAdded > NOB)
+	{
+		cout << "All new block mined for myblockchain." << endl;
+		return;
+	}
+
+	for (int i = 0; i < NOM; i++)
+	{
+		miners[i] = thread(minerFunc, i + 1, blockchain, newBlocks);
+	}
+}
 
 
 int main()
@@ -78,11 +131,11 @@ int main()
 	Transaction t1(&alice, &bob, "Sword");
 	alice.Sign(t1);
 	Transaction t2(&bob, &alice, "Gem");
-	bob.Sign(t2); 
+	bob.Sign(t2);
 	Transaction t3(&bob, &john, "Sword");
 	bob.Sign(t3);
 
-	
+
 
 	string input;
 
@@ -123,7 +176,7 @@ int main()
 			<< "Block verify: " << blockChain.GetChain().back()->Verify(NOZ) << endl << endl;
 
 		cout << "Saving copies of blockchain to players\n";
-		
+
 		ofstream outputFile;
 		for (const Player* player : players)
 		{
@@ -168,7 +221,7 @@ int main()
 
 			blockchains.emplace_back(bc);
 		}
-		else 
+		else
 		{
 			cout << player->GetName() + " file read failed\n";
 		}
@@ -182,10 +235,12 @@ int main()
 	cout << "John last hash: " << blockchains[2].GetChain().back()->GetHash() << endl;
 
 	cout << "/****** start voting ******/" << endl;
-	unordered_map<string, int> lastHashCount; 
+	
+
+	unordered_map<string, int> lastHashCount;
 	int maxCount = 0;
 	string maxCountLastHash;
-	
+
 	for (Blockchain bc : blockchains)
 	{
 		string lastHash = bc.GetChain().back()->GetHash();
@@ -197,6 +252,7 @@ int main()
 			{
 				maxCountLastHash = lastHash;
 				maxCount = lastHashCount[lastHash];
+				myBlockChain = bc;
 			}
 		}
 		else
@@ -205,7 +261,9 @@ int main()
 		}
 	}
 
-	cout << "voting result: "  << maxCountLastHash << endl;
+	cout << "voting result: " << maxCountLastHash << endl;
+
+
 
 	cout << "(not implement yet)correct the user file that give the wrong vote? y/n: ";
 	cin >> input;
@@ -215,9 +273,55 @@ int main()
 		// TODO: write the correct copy to the wrong user's file
 	}
 
-	cout << "/****** add new block ******/" << endl;
+	cout << "/****** add new block to blockchain and cheater add fake block ******/" << endl;
+	int index = myBlockChain.GetChain().back()->GetIndex() + 1;
 
+	Blockchain cheaterBlockChain = myBlockChain;
 
+	Block realBlock(index);
+	realBlock.AddTransaction(t1);
+	realBlock.AddTransaction(t2);
+	realBlock.AddTransaction(t3);
+
+	Block fakeBlock(index);
+	fakeBlock.AddTransaction(t1);
+	fakeBlock.AddTransaction(t3);
+
+	cout << "cheater mining fake block into cheater blockchain" << endl;
+	cheaterBlockChain.AddBlock(&fakeBlock);
+
+	cout << "mining realBlock into my blockchain" << endl;
+	myBlockChain.AddBlock(&realBlock);
+
+	cout << "Add 8 new blocks into blockchain. 5 miner(miner1 to miner5) VS 1 cheater(miner0)" << endl;
+
+	Block* newBlocks[NOB];
+	for (int i = 0; i < NOB; i++)
+	{
+		newBlocks[i] = new Block(++index);
+		newBlocks[i]->AddTransaction(t1);
+		newBlocks[i]->AddTransaction(t2);
+	}
+
+	for (int i = 0; i < NOM; i++)
+	{
+		miners[i] = thread(minerFunc, (i + 1), myBlockChain, newBlocks);
+	}
+	
+
+	for (int i = 0; i < NOB; i++)
+	{	
+		Block* newBlock = new Block(*newBlocks[i]);
+		cout << "cheater start mining new Block" << i << endl;
+		cheaterBlockChain.AddBlock(newBlock);
+		
+	}
+	cout << "cheater mining finished." << endl;
+	
+	for (int i = 0; i < NOM; i++)
+	{
+		miners[i].join();
+	}
 
 	return 0;
 }

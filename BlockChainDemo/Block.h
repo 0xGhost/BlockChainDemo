@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <mutex>
 #include "Transaction.h"
 
 using std::string;
@@ -14,6 +15,7 @@ public:
 	Block(const unsigned int index);
 
 	void Mine(const unsigned int numOf0);
+	bool ThreadingStoppableMine(const unsigned int numOf0, int& newestBlock);
 	bool Verify(const unsigned int numOf0) const;
 
 	void AddTransaction(const Transaction t);
@@ -37,6 +39,8 @@ private:
 	//string* prevHash;
 	Block* prevBlock;
 	string hash;
+	//vector<Block*> nextBlocks;
+
 
 
 	string CombineBlockString() const;

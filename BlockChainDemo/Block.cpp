@@ -23,6 +23,20 @@ void Block::Mine(const unsigned int numOf0)
 	}
 }
 
+bool Block::ThreadingStoppableMine(const unsigned int numOf0, int& newestBlock)
+{
+	int miningBlock = newestBlock;
+	hash = "1";
+	string target(numOf0, '0');
+	while (miningBlock == newestBlock && hash.compare(0, numOf0, target) != 0)
+	{
+		++nonce;
+		hash = sha256(CombineBlockString());
+	}
+
+	return Verify(numOf0);
+}
+
 bool Block::Verify(const unsigned int numOf0) const
 {
 	string target(numOf0, '0');
