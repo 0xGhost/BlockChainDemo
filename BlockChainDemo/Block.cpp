@@ -12,13 +12,13 @@ Block::Block(const unsigned int index) : index(index)
 	//timeStamp = time(nullptr);
 }
 
-void Block::Mine(const unsigned int numOf0)
+void Block::Mine(const unsigned int numOf0, bool p)
 {
 	hash = "1";
 	string target(numOf0, '0');
 	while (hash.compare(0, numOf0, target) != 0)
 	{
-		++nonce;
+		++nonce; //if(p)std::cout << "c";
 		hash = sha256(CombineBlockString());
 	}
 }
@@ -30,7 +30,7 @@ bool Block::ThreadingStoppableMine(const unsigned int numOf0, int& newestBlock)
 	string target(numOf0, '0');
 	while (miningBlock == newestBlock && hash.compare(0, numOf0, target) != 0)
 	{
-		++nonce;
+		++nonce; //std::cout << "m";
 		hash = sha256(CombineBlockString());
 	}
 

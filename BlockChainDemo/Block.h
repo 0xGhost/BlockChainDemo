@@ -14,7 +14,7 @@ class Block
 public:
 	Block(const unsigned int index);
 
-	void Mine(const unsigned int numOf0);
+	void Mine(const unsigned int numOf0, bool print = false);
 	bool ThreadingStoppableMine(const unsigned int numOf0, int& newestBlock);
 	bool Verify(const unsigned int numOf0) const;
 

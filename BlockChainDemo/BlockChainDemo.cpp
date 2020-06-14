@@ -69,7 +69,7 @@ thread miners[NOM];
 
 std::mutex mtx;
 
-void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks);
+//void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks);
 
 void minerFunc(const int id, const Blockchain& blockchain, Block** newBlocks)
 {
@@ -78,42 +78,67 @@ void minerFunc(const int id, const Blockchain& blockchain, Block** newBlocks)
 		// get copy from newBlocks array
 		Block* newBlock = new Block(*newBlocks[newBlockAdded]);
 		newBlock->SetPrevBlock(*blockchain.GetChain().back());
-		mtx.lock();
 		cout << "miner" << id << " start mining block" << newBlockAdded << endl;
-		mtx.unlock();
 
-	
+
+		int temp = newBlockAdded;
 		if (newBlock->ThreadingStoppableMine(NOZ, newBlockAdded))
 		{
-			if (mtx.try_lock())
+			
+			std::lock_guard<std::mutex> lockGuard(mutex);
+			if (newBlockAdded == temp)
 			{
-				cout << "new block" << newBlockAdded << "  mined. Miner: " << id << endl;
-
+				cout << "new block" << newBlockAdded << "  mined. Miner: " << id << " nonce:" << newBlock->GetNonce() <<  endl;
+				++newBlockAdded;
 				myBlockChain.AddBlock(newBlock);
-				newBlockAdded++;
-				mtx.unlock();
 			}
 		}
+		else
+		{
+			int a = 1;
+		}
 	}
+	cout << "myBlockchain mining finish." << endl;
 }
 
-void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks)
+void CheaterFunc(Blockchain* blockchain, Block** newBlocks)
 {
-	cout << "Mining new Block" << newBlockAdded <<" finish. Miner: " + id << endl;
-
-	myBlockChain.AddBlock(newBlock);
-	newBlockAdded++;
-	if (newBlockAdded > NOB)
+	int newBlockCount = 0;
+	while (newBlockCount < NOB)
 	{
-		cout << "All new block mined for myblockchain." << endl;
-		return;
-	}
+		// get copy from newBlocks array
+		Block* newBlock = new Block(*newBlocks[newBlockCount]);
+		newBlock->SetPrevBlock(*(blockchain->GetChain().back()));
+		cout << "Cheater start mining block" << newBlockCount << endl;
 
-	for (int i = 0; i < NOM; i++)
-	{
-		miners[i] = thread(minerFunc, i + 1, blockchain, newBlocks);
+		newBlock->Mine(NOZ, true);
+
+
+		cout << "Cheater blockchain new block" << newBlockCount << "  mined." << " nonce:" << newBlock->GetNonce() << endl;
+
+		blockchain->AddBlock(newBlock);
+		newBlockCount++;
 	}
+	cout << "cheater mining finished." << endl;
 }
+
+//void MiningFinish(const int id, Block* newBlock, const Blockchain& blockchain, Block** newBlocks)
+//{
+//	cout << "Mining new Block" << newBlockAdded <<" finish. Miner: " + id << endl;
+//
+//	myBlockChain.AddBlock(newBlock);
+//	newBlockAdded++;
+//	if (newBlockAdded > NOB)
+//	{
+//		cout << "All new block mined for myblockchain." << endl;
+//		return;
+//	}
+//
+//	for (int i = 0; i < NOM; i++)
+//	{
+//		miners[i] = thread(minerFunc, i + 1, blockchain, newBlocks);
+//	}
+//}
 
 
 int main()
@@ -307,21 +332,25 @@ int main()
 	{
 		miners[i] = thread(minerFunc, (i + 1), myBlockChain, newBlocks);
 	}
-	
+	std::thread cheater(CheaterFunc, &cheaterBlockChain, newBlocks);
 
-	for (int i = 0; i < NOB; i++)
+
+	//std::thread cheater(CheaterFunc, &cheaterBlockChain, newBlocks);
+
+	/*for (int i = 0; i < NOB; i++)
 	{	
 		Block* newBlock = new Block(*newBlocks[i]);
 		cout << "cheater start mining new Block" << i << endl;
 		cheaterBlockChain.AddBlock(newBlock);
 		
 	}
-	cout << "cheater mining finished." << endl;
+	cout << "cheater mining finished." << endl;*/
 	
 	for (int i = 0; i < NOM; i++)
 	{
 		miners[i].join();
 	}
+	cheater.join();
 
 	return 0;
 }
