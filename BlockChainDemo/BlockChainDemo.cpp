@@ -6,6 +6,8 @@
 #include <thread> 
 #include <mutex>
 
+
+// include openssl
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
@@ -15,11 +17,46 @@
 #include <openssl/err.h>
 #include <assert.h>
 
+// include RakNet
+#include "MessageIdentifiers.h"
+
+#include "RakPeerInterface.h"
+#include "RakNetStatistics.h"
+#include "RakNetTypes.h"
+#include "BitStream.h"
+#include "PacketLogger.h"
+#include <assert.h>
+#include <cstdio>
+#include <cstring>
+#include <stdlib.h>
+#include "RakNetTypes.h"
+#ifdef _WIN32
+#include "Kbhit.h"
+#include "WindowsIncludes.h" // Sleep
+#else
+#include "Kbhit.h"
+#include <unistd.h> // usleep
+#endif
+#include "Gets.h"
+
+#if LIBCAT_SECURITY==1
+#include "SecureHandshake.h" // Include header for secure handshake
+#endif
+
+
 #include "Blockchain.h"
 #include "RSATool.h"
 #include "Player.h"
 
-using namespace std;
+//using namespace std;
+using std::string;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::thread;
+using std::ifstream;
+using std::ofstream;
+using std::unordered_map;
 
 string privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"\
 "MIIEowIBAAKCAQEAy8Dbv8prpJ/0kKhlGeJYozo2t60EG8L0561g13R29LvMR5hy\n"\
@@ -85,7 +122,7 @@ void minerFunc(const int id, const Blockchain& blockchain, Block** newBlocks)
 		if (newBlock->ThreadingStoppableMine(NOZ, newBlockAdded))
 		{
 			
-			std::lock_guard<std::mutex> lockGuard(mutex);
+			//std::lock_guard<std::mutex> lockGuard(mutex);
 			if (newBlockAdded == temp)
 			{
 				cout << "new block" << newBlockAdded << "  mined. Miner: " << id << " nonce:" << newBlock->GetNonce() <<  endl;
@@ -143,6 +180,45 @@ void CheaterFunc(Blockchain* blockchain, Block** newBlocks)
 
 int main()
 {
+#if true // true -> networking
+
+	RakNet::RakNetStatistics* rss;
+	// Pointers to the interfaces of our server and client.
+	// Note we can easily have both in the same program
+	RakNet::RakPeerInterface* client = RakNet::RakPeerInterface::GetInstance();
+	//	client->InitializeSecurity(0,0,0,0);
+		//RakNet::PacketLogger packetLogger;
+		//client->AttachPlugin(&packetLogger);
+
+
+		// Holds packets
+	RakNet::Packet* p;
+
+	// GetPacketIdentifier returns this
+	unsigned char packetIdentifier;
+
+	// Just so we can remember where the packet came from
+	bool isServer;
+
+	// Record the first client that connects to us so we can pass it to the ping function
+	RakNet::SystemAddress clientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
+
+	// Crude interface
+
+	// Holds user data
+	char ip[64], serverPort[30], clientPort[30];
+
+	// A client
+	isServer = false;
+
+
+
+
+	// We're done with the network
+	RakNet::RakPeerInterface::DestroyInstance(client);
+
+#else
+
 	vector<Player*> players;
 
 	Player alice("Alice");
@@ -351,6 +427,6 @@ int main()
 		miners[i].join();
 	}
 	cheater.join();
-
+#endif
 	return 0;
 }
