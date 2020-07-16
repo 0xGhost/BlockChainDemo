@@ -51,24 +51,24 @@ void NetworkNode::Listen()
 	this->rakPeer->SetMaximumIncomingConnections(1);
 }
 
-void NetworkNode::AttemptNatPunchthrough(std::string remote_guid_)
+void NetworkNode::AttemptNatPunchthrough(string remoteGUID)
 {
 	this->sentNatPunchthroughRequest = true;
 	RakNet::RakNetGUID remote;
-	remote.FromString(remote_guid_.c_str());
+	remote.FromString(remoteGUID.c_str());
 	this->natPunchthroughClient.OpenNAT(remote, *(this->natPunchServerAddress));
 }
 
-void NetworkNode::sendMessage(std::string message_)
+void NetworkNode::SendStringMessage(string message)
 {
 	// Just trim the message, just in case.
-	message_ = message_.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
 
 	RakNet::BitStream bs;
 
 	bs.Write(static_cast<unsigned char>(ID_USER_PACKET_ENUM));
-	bs.Write(static_cast<unsigned int>(message_.size()));
-	bs.Write(message_.c_str(), static_cast<unsigned int>(message_.size()));
+	bs.Write(static_cast<unsigned int>(message.size()));
+	bs.Write(message.c_str(), static_cast<unsigned int>(message.size()));
 
 	this->rakPeer->Send(&bs, MEDIUM_PRIORITY, RELIABLE, 1,
 		this->remotePeer, false);

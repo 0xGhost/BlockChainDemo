@@ -26,13 +26,13 @@ public:
 	// If the NAT punchthrough was successfull, the peer which sent the
 	// NAT punchthrough request sends a connection request to the target
 	// peer.
-	void AttemptNatPunchthrough(std::string);
+	void AttemptNatPunchthrough(string remoteGUID);
 	// Sends a string message to the connected peer. The message consists
 	// of 3 parts:
 	// -Message identifier
 	// -Length of the string
 	// -An array of characters
-	void sendMessage(std::string);
+	void SendStringMessage(string message);
 
 private:
 	// The maximum length for the string messages sent between the peers.

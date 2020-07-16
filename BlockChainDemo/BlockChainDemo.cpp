@@ -43,7 +43,7 @@
 #include "SecureHandshake.h" // Include header for secure handshake
 #endif
 
-
+#include "NetworkNode.h"
 #include "Blockchain.h"
 #include "RSATool.h"
 #include "Player.h"
@@ -180,42 +180,53 @@ void CheaterFunc(Blockchain* blockchain, Block** newBlocks)
 
 int main()
 {
-#if true // true -> networking
+#if 1 // 1 -> networking
 
-	RakNet::RakNetStatistics* rss;
-	// Pointers to the interfaces of our server and client.
-	// Note we can easily have both in the same program
-	RakNet::RakPeerInterface* client = RakNet::RakPeerInterface::GetInstance();
-	//	client->InitializeSecurity(0,0,0,0);
-		//RakNet::PacketLogger packetLogger;
-		//client->AttachPlugin(&packetLogger);
+	std::cout << "* Usage:" << std::endl <<
+		"  [l]isten for a connection" << std::endl <<
+		"  [c]onnect to a remote peer" << std::endl <<
+		"  [s]end a message to the remote peer" << std::endl <<
+		"  [q]uit" << std::endl;
 
+	NetworkNode* peer = new NetworkNode();
+	bool isRunning = true;
+	std::string input;
 
-		// Holds packets
-	RakNet::Packet* p;
+	while (isRunning)
+	{
+		std::cin >> input;
 
-	// GetPacketIdentifier returns this
-	unsigned char packetIdentifier;
+		if (input == "l")
+		{
+			peer->Listen();
+		}
+		else if (input == "c")
+		{
+			std::cout << "* Enter the guid of the remote peer:" << std::endl;
+			std::cin >> input;
+			peer->AttemptNatPunchthrough(input);
+		}
 
-	// Just so we can remember where the packet came from
-	bool isServer;
+		else if (input == "s")
+		{
+			std::cout << "* Enter message:" << std::endl;;
+			std::cin >> input;
+			peer->SendStringMessage(input);
+		}
 
-	// Record the first client that connects to us so we can pass it to the ping function
-	RakNet::SystemAddress clientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
+		else if (input == "q")
+		{
+			isRunning = false;
+}
 
-	// Crude interface
+		else
+		{
+			std::cout << "undefined control" << std::endl;
+		}
+	}
 
-	// Holds user data
-	char ip[64], serverPort[30], clientPort[30];
+	delete peer;
 
-	// A client
-	isServer = false;
-
-
-
-
-	// We're done with the network
-	RakNet::RakPeerInterface::DestroyInstance(client);
 
 #else
 
