@@ -177,10 +177,249 @@ void CheaterFunc(Blockchain* blockchain, Block** newBlocks)
 //	}
 //}
 
+unsigned char GetPacketIdentifier(RakNet::Packet* p)
+{
+	if (p == 0)
+		return 255;
+
+	if ((unsigned char)p->data[0] == ID_TIMESTAMP)
+	{
+		RakAssert(p->length > sizeof(RakNet::MessageID) + sizeof(RakNet::Time));
+		return (unsigned char)p->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)];
+	}
+	else
+		return (unsigned char)p->data[0];
+}
 
 int main()
 {
+	
+
 #if 1 // 1 -> networking
+
+#if 1 // simple networking
+
+	Blockchain* blockchain;
+	vector<Player*> players;
+
+	Player alice("Alice");
+	Player bob("Bob");
+	Player john("John");
+
+	players.push_back(&alice);
+	players.push_back(&bob);
+	players.push_back(&john);
+
+	Transaction t1(&alice, &bob, "Sword");
+	alice.Sign(t1);
+	Transaction t2(&bob, &alice, "Gem");
+	bob.Sign(t2);
+	Transaction t3(&bob, &john, "Sword");
+	bob.Sign(t3);
+
+#pragma region StartServer
+	RakNet::RakPeerInterface* server = RakNet::RakPeerInterface::GetInstance();
+	//RakNet::RakNetStatistics* rss;
+	server->SetIncomingPassword("BlockChainDemo", (int)strlen("BlockChainDemo"));
+	server->SetTimeoutTime(30000, RakNet::UNASSIGNED_SYSTEM_ADDRESS);
+
+	// Holds packets
+	RakNet::Packet* p;
+
+	// GetPacketIdentifier returns this
+	unsigned char packetIdentifier;
+
+	// Record the first client that connects to us so we can pass it to the ping function
+	RakNet::SystemAddress clientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
+
+
+
+	int port;
+	cout << "Enter port you want to listen on: ";
+	cin >> port;
+
+	//RakNet::SocketDescriptor socketDescriptor(port, 0);
+	//socketDescriptor.socketFamily = AF_INET;
+	//server->Startup(10, &socketDescriptor, 1);
+	//server->SetMaximumIncomingConnections(10);
+	//server->SetOccasionalPing(true);
+	//server->SetUnreliableTimeout(1000);
+#pragma endregion
+
+	
+
+#pragma region StartClient
+	RakNet::RakPeerInterface* client = RakNet::RakPeerInterface::GetInstance();
+	client->SetIncomingPassword("BlockChainDemo", (int)strlen("BlockChainDemo"));
+
+
+	client->AllowConnectionResponseIPMigration(false);
+
+	RakNet::SocketDescriptor socketDescriptor2(port, 0);
+	socketDescriptor2.socketFamily = AF_INET;
+	client->Startup(10, &socketDescriptor2, 1);
+	client->SetMaximumIncomingConnections(10);
+	client->SetOccasionalPing(true);
+
+	int otherPort;
+	cout << "Enter port you want to send to: ";
+	cin >> otherPort;
+
+	RakNet::ConnectionAttemptResult car = client->Connect("127.0.0.1", otherPort, "BlockChainDemo", (int)strlen("BlockChainDemo"));
+	cout << "connect result: " << car;
+	RakAssert(car == RakNet::CONNECTION_ATTEMPT_STARTED);
+#pragma endregion
+
+
+	string message;
+
+	while (1)
+	{
+		// This sleep keeps RakNet responsive
+		Sleep(30);
+
+
+
+		if (kbhit())
+		{
+			// Notice what is not here: something to keep our network running.  It's
+			// fine to block on Gets or anything we want
+			// Because the network engine was painstakingly written using threads.
+			cin >> message;
+			client->Send(message.c_str(), message.length() + 1, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+		}
+
+		for (p = client->Receive(); p; client->DeallocatePacket(p), p = client->Receive())
+		{
+			// We got a packet, get the identifier with our handy function
+			packetIdentifier = GetPacketIdentifier(p);
+
+			// Check if this is a network message packet
+			switch (packetIdentifier)
+			{
+			case ID_DISCONNECTION_NOTIFICATION:
+				// Connection lost normally
+				printf("ID_DISCONNECTION_NOTIFICATION\n");
+				break;
+			case ID_ALREADY_CONNECTED:
+				// Connection lost normally
+				printf("ID_ALREADY_CONNECTED with guid %" PRINTF_64_BIT_MODIFIER "u\n", p->guid);
+				break;
+			case ID_INCOMPATIBLE_PROTOCOL_VERSION:
+				printf("ID_INCOMPATIBLE_PROTOCOL_VERSION\n");
+				break;
+			case ID_REMOTE_DISCONNECTION_NOTIFICATION: // Server telling the clients of another client disconnecting gracefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				printf("ID_REMOTE_DISCONNECTION_NOTIFICATION\n");
+				break;
+			case ID_REMOTE_CONNECTION_LOST: // Server telling the clients of another client disconnecting forcefully.  You can manually broadcast this in a peer to peer enviroment if you want.
+				printf("ID_REMOTE_CONNECTION_LOST\n");
+				break;
+			case ID_REMOTE_NEW_INCOMING_CONNECTION: // Server telling the clients of another client connecting.  You can manually broadcast this in a peer to peer enviroment if you want.
+				printf("ID_REMOTE_NEW_INCOMING_CONNECTION\n");
+				break;
+			case ID_CONNECTION_BANNED: // Banned from this server
+				printf("We are banned from this server.\n");
+				break;
+			case ID_CONNECTION_ATTEMPT_FAILED:
+				printf("Connection attempt failed\n");
+				break;
+			case ID_NO_FREE_INCOMING_CONNECTIONS:
+				// Sorry, the server is full.  I don't do anything here but
+				// A real app should tell the user
+				printf("ID_NO_FREE_INCOMING_CONNECTIONS\n");
+				break;
+
+			case ID_INVALID_PASSWORD:
+				printf("ID_INVALID_PASSWORD\n");
+				break;
+
+			case ID_CONNECTION_LOST:
+				// Couldn't deliver a reliable packet - i.e. the other system was abnormally
+				// terminated
+				printf("ID_CONNECTION_LOST\n");
+				break;
+
+			case ID_CONNECTION_REQUEST_ACCEPTED:
+				// This tells the client they have connected
+				printf("ID_CONNECTION_REQUEST_ACCEPTED to %s with GUID %s\n", p->systemAddress.ToString(true), p->guid.ToString());
+				printf("My external address is %s\n", client->GetExternalID(p->systemAddress).ToString(true));
+				break;
+			case ID_CONNECTED_PING:
+			case ID_UNCONNECTED_PING:
+				printf("Ping from %s\n", p->systemAddress.ToString(true));
+				break;
+			default:
+				// It's a client, so just show the message
+				printf("%s\n", p->data);
+				break;
+			}
+		}
+
+	}
+	server->Shutdown(300);
+	client->Shutdown(300);
+	// We're done with the network
+	RakNet::RakPeerInterface::DestroyInstance(server);
+	RakNet::RakPeerInterface::DestroyInstance(client);
+	return 0;
+
+	vector<int> listOfNodes; //vector of the ports of nodes in the network
+
+	string input;
+	cout << "First node? Initial blockchain? y/n: ";
+	cin >> input;
+
+	if (input == "y" || input == "Y")
+	{
+		cout << "Creating the chain and mining block 0..." << endl;
+		blockchain = new Blockchain(NOZ);
+		cout << *(blockchain->GetChain().back()) << endl;
+
+		cout << "Mining block 1..." << endl;
+		Block b1(1);
+		b1.AddTransaction(t1);
+		b1.AddTransaction(t2);
+		b1.AddTransaction(t3);
+		blockchain->AddBlock(&b1);
+		cout << *(blockchain->GetChain().back())
+			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+
+		cout << "Mining block 2..." << endl;
+		Block b2(2);
+		b2.AddTransaction(t2);
+		b2.AddTransaction(t3);
+		blockchain->AddBlock(&b2);
+		cout << *(blockchain->GetChain().back())
+			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+
+
+		cout << "Mining block 3..." << endl;
+		Block b3(3);
+		b3.AddTransaction(t1);
+		b3.AddTransaction(t2);
+		blockchain->AddBlock(&b3);
+		cout << *(blockchain->GetChain().back())
+			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+	}
+	else
+	{
+		int inputPorts;
+		int n;
+		cout << "Enter number of nodes in network: ";
+		cin >> n;
+		
+		for (int i = 0; i < n; i++)
+		{
+			cout << "Enter port of node" << i << " in network: ";
+			cin >> inputPorts;
+			listOfNodes.push_back(inputPorts);
+		}
+		
+
+	}
+
+	delete blockchain;
+#else// p2p
 
 	std::cout << "* Usage:" << std::endl <<
 		"  [l]isten for a connection" << std::endl <<
@@ -217,7 +456,7 @@ int main()
 		else if (input == "q")
 		{
 			isRunning = false;
-}
+		}
 
 		else
 		{
@@ -227,8 +466,9 @@ int main()
 
 	delete peer;
 
+#endif
 
-#else
+#else // local simlutation
 
 	vector<Player*> players;
 

@@ -1,6 +1,5 @@
 #include "NetworkNode.h"
 
-
 NetworkNode::NetworkNode()
 {
 	this->sentNatPunchthroughRequest = false;
@@ -25,7 +24,7 @@ NetworkNode::NetworkNode()
 
 	// Connect to the NAT Punchthrough server
 	std::cout << "* Connecting to the NAT punchthrough server..." << std::endl;
-	rakPeer->Connect(this->natPunchServerAddress->ToString(false),
+	RakNet::ConnectionAttemptResult result = rakPeer->Connect(this->natPunchServerAddress->ToString(false),
 		this->natPunchServerAddress->GetPort(), 0, 0);
 }
 

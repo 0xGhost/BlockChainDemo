@@ -434,6 +434,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="RSATool.h" />
     <ClInclude Include="SHA256.h" />
+    <ClInclude Include="SimpleNetwork.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
   <ItemGroup>

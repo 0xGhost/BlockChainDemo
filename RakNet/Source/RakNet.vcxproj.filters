@@ -10,13 +10,13 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="CrashReporter">
-      <UniqueIdentifier>{520b3571-227c-410d-9a6c-e93691384816}</UniqueIdentifier>
+      <UniqueIdentifier>{f4bc03ac-7763-4dea-9e50-d5af918dcdc2}</UniqueIdentifier>
     </Filter>
     <Filter Include="DependentExtensions">
-      <UniqueIdentifier>{52f73592-7b3f-48ce-91c1-1e4c94f8e10a}</UniqueIdentifier>
+      <UniqueIdentifier>{0049e413-f890-4cb8-914f-8a34b2e2d338}</UniqueIdentifier>
     </Filter>
     <Filter Include="AutopatcherPostgreRepository">
-      <UniqueIdentifier>{16e23ea2-d7f8-4842-84cc-c07f4f54150b}</UniqueIdentifier>
+      <UniqueIdentifier>{63ab697c-f860-488d-9ad9-3038bffcd793}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
