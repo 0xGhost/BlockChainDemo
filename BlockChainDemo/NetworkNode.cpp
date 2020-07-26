@@ -2,17 +2,13 @@
 
 NetworkNode::NetworkNode()
 {
-	this->sentNatPunchthroughRequest = false;
-
 	this->rakPeer = RakNet::RakPeerInterface::GetInstance();
-	this->rakPeer->AttachPlugin(&(this->natPunchthroughClient));
-	this->natPunchServerAddress = new RakNet::SystemAddress("natpunch.jenkinssoftware.com", 61111);
 
-	// Use the default socket descriptor; this will make the OS assign us a
-	// random port.
 	RakNet::SocketDescriptor socketDescriptor;
-	// Allow 2 connections: one for the other peer, one for the NAT server.
-	this->rakPeer->Startup(2, &socketDescriptor, 1);
+	socketDescriptor.socketFamily = AF_INET;
+	this->rakPeer->Startup(MAX_CONNECTION, &socketDescriptor, 1);
+	rakPeer->SetMaximumIncomingConnections(10);
+	rakPeer->SetOccasionalPing(true);
 
 	std::cout << "* Your GUID is:" << std::endl <<
 		this->rakPeer->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS).ToString()
@@ -21,11 +17,30 @@ NetworkNode::NetworkNode()
 	// Start the thread for packet receiving
 	this->isListening = true;
 	this->listenLoopThread = new std::thread(&NetworkNode::ListenLoop, this);
+}
 
-	// Connect to the NAT Punchthrough server
-	std::cout << "* Connecting to the NAT punchthrough server..." << std::endl;
-	RakNet::ConnectionAttemptResult result = rakPeer->Connect(this->natPunchServerAddress->ToString(false),
-		this->natPunchServerAddress->GetPort(), 0, 0);
+NetworkNode::NetworkNode(const int port)
+{
+	this->rakPeer = RakNet::RakPeerInterface::GetInstance();
+	rakPeer->SetIncomingPassword("BlockChainDemo", (int)strlen("BlockChainDemo"));
+	rakPeer->SetTimeoutTime(30000, RakNet::UNASSIGNED_SYSTEM_ADDRESS);
+	RakNet::SocketDescriptor socketDescriptor(port,0);
+	socketDescriptor.socketFamily = AF_INET;
+	this->rakPeer->Startup(MAX_CONNECTION, &socketDescriptor, 1);
+	rakPeer->SetOccasionalPing(true);
+	this->rakPeer->SetMaximumIncomingConnections(MAX_CONNECTION);
+
+	//std::cout << "* Your GUID is:" << std::endl <<
+	//	this->rakPeer->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS).ToString()
+	//	<< std::endl;
+
+
+	// Start the thread for packet receiving
+	this->isListening = true;
+	this->listenLoopThread = new std::thread(&NetworkNode::ListenLoop, this);
+
+	//RakNet::ConnectionAttemptResult result = rakPeer->Connect(this->natPunchServerAddress->ToString(false),
+	//	this->natPunchServerAddress->GetPort(), 0, 0);
 }
 
 NetworkNode::~NetworkNode()
@@ -41,21 +56,12 @@ NetworkNode::~NetworkNode()
 	// Cleanup...
 	RakNet::RakPeerInterface::DestroyInstance(this->rakPeer);
 	delete this->packet;
-	delete this->natPunchServerAddress;
 }
 
-void NetworkNode::Listen()
+void NetworkNode::Connect(const int port)
 {
-	std::cout << "* Started listening for a connection..." << std::endl;
-	this->rakPeer->SetMaximumIncomingConnections(1);
-}
-
-void NetworkNode::AttemptNatPunchthrough(string remoteGUID)
-{
-	this->sentNatPunchthroughRequest = true;
-	RakNet::RakNetGUID remote;
-	remote.FromString(remoteGUID.c_str());
-	this->natPunchthroughClient.OpenNAT(remote, *(this->natPunchServerAddress));
+	RakNet::ConnectionAttemptResult car = rakPeer->Connect("127.0.0.1", port, "BlockChainDemo", (int)strlen("BlockChainDemo"));
+	RakAssert(car == RakNet::CONNECTION_ATTEMPT_STARTED);
 }
 
 void NetworkNode::SendStringMessage(string message)
@@ -69,15 +75,19 @@ void NetworkNode::SendStringMessage(string message)
 	bs.Write(static_cast<unsigned int>(message.size()));
 	bs.Write(message.c_str(), static_cast<unsigned int>(message.size()));
 
-	this->rakPeer->Send(&bs, MEDIUM_PRIORITY, RELIABLE, 1,
-		this->remotePeer, false);
+	//this->rakPeer->Send(&bs, MEDIUM_PRIORITY, RELIABLE, 1,
+	//	RakNet::UNASSIGNED_SYSTEM_ADDRESS, false);
+	
+	//rakPeer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+	rakPeer->Send(message.c_str(), message.length() + 1, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+
 }
 
 void NetworkNode::ListenLoop()
 {
 	// Allocate the buffer for the incoming message string
 	char* message = new char[this->MAX_USER_MESSAGE_LENGTH];
-
+	
 	while (this->isListening)
 	{
 		for (this->packet = this->rakPeer->Receive();
@@ -93,33 +103,13 @@ void NetworkNode::ListenLoop()
 			switch (this->packet->data[0])
 			{
 			case ID_CONNECTION_REQUEST_ACCEPTED:
-				if (this->packet->systemAddress ==
-					*(this->natPunchServerAddress))
-				{
-					std::cout << "* Successfully connected to the NAT " <<
-						"punchthrough server." << std::endl;
-				}
-				else if (this->packet->systemAddress == this->remotePeer)
-				{
-					std::cout << "* Connection to the remote peer " <<
-						"successfully established." << std::endl;
-				}
+				printf("ID_CONNECTION_REQUEST_ACCEPTED to %s with GUID %s\n", this->packet->systemAddress.ToString(true), this->packet->guid.ToString());
+				printf("My external address is %s\n", this->rakPeer->GetExternalID(this->packet->systemAddress).ToString(true));
 				break;
 			case ID_NEW_INCOMING_CONNECTION:
 				std::cout << "* A peer has connected." << std::endl;
 				break;
-			case ID_NAT_PUNCHTHROUGH_SUCCEEDED:
-				std::cout << "* NAT punchthrough succeeded!" << std::endl;
-				this->remotePeer = this->packet->systemAddress;
-
-				if (this->sentNatPunchthroughRequest)
-				{
-					this->sentNatPunchthroughRequest = false;
-					std::cout << "* Connecting to the peer..." << std::endl;
-					this->rakPeer->Connect(this->remotePeer.ToString(false),
-						this->remotePeer.GetPort(), 0, 0);
-				}
-				break;
+			
 			case ID_USER_PACKET_ENUM:
 				unsigned char rcv_id;
 				bts.Read(rcv_id);
@@ -144,6 +134,7 @@ void NetworkNode::ListenLoop()
 			default:
 				std::cout << "* Received a packet with unspecified " <<
 					"message identifier." << std::endl;
+				std::cout << packet->data << std::endl;
 				break;
 			} // check package identifier
 		} // package receive loop
