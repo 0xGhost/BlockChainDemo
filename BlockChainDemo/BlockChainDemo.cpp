@@ -97,7 +97,7 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 "wQIDAQAB\n"\
 "-----END PUBLIC KEY-----\n";
 
-#define NOZ 4 // num of zero for the hash
+extern const int NOZ = 4; // num of zero for the hash
 
 #define NOM 5 // num of miner
 #define NOB 8 // num of new Block pending
@@ -198,7 +198,6 @@ int main()
 
 #if 1 // 1 -> networking
 
-#if 1 // simple networking
 
 	Blockchain* blockchain;
 	vector<Player*> players;
@@ -218,9 +217,19 @@ int main()
 	Transaction t3(&bob, &john, "Sword");
 	bob.Sign(t3);
 
-	blockchain = new Blockchain(NOZ);
+	Block b1(1);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t3);
 
-#pragma region StartPeer
+	Block b2(2);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+
+	Block b3(3);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+
 
 	int port;
 	cout << "Enter port you want to listen on: ";
@@ -228,281 +237,78 @@ int main()
 
 	NetworkNode node(port);
 
-	cout << "Enter port you want to send to: (0 to skip)";
-	cin >> port;
-	if (port != 0)
-	{
-		node.Connect(port);
-	}
+	cout << "Enter \"\\c\" to connect other node\n"
+		<< "Enter \"\\s\" to boardcast blockchain\n"
+		<< "Enter \"\\i\" to initialize blockchain\n"
+		<< "Enter \"\\b\" to view current blockchain\n"
+		<< "Enter \"\\r\" to request latest blockchain\n";
+
+
 	while (1)
 	{
 		string input;
 		cin >> input;
-		if (input == "b")
+		if (input == "\\c")
 		{
-			input.clear();
-			std::stringstream ss;
-			ss << *blockchain;
-
-			string temp;
-			while (!ss.eof())
+			cout << "Enter port you want to connect: (0 to skip)";
+			cin >> port;
+			if (port != 0)
 			{
-				ss >> temp;
-				input += temp+'\n';
+				node.Connect(port);
 			}
-			input = ss.str();
 		}
-		node.SendStringMessage(input);
-	}
-
-	return 0;
-
-//	// Holds packets
-//	RakNet::Packet* p;
-//
-//	// GetPacketIdentifier returns this
-//	unsigned char packetIdentifier;
-//
-//	// Record the first client that connects to us so we can pass it to the ping function
-//	RakNet::SystemAddress peerID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
-//
-//	RakNet::RakPeerInterface* peer = RakNet::RakPeerInterface::GetInstance();
-//	peer->SetIncomingPassword("BlockChainDemo", (int)strlen("BlockChainDemo"));
-//	peer->SetTimeoutTime(30000, RakNet::UNASSIGNED_SYSTEM_ADDRESS);
-//
-//
-//	peer->AllowConnectionResponseIPMigration(false);
-//
-//	RakNet::SocketDescriptor socketDescriptor2(port, 0);
-//	socketDescriptor2.socketFamily = AF_INET;
-//	peer->Startup(10, &socketDescriptor2, 1);
-//	peer->SetMaximumIncomingConnections(10);
-//	peer->SetOccasionalPing(true);
-//
-//	int otherPort;
-//	cout << "Enter port you want to send to: ";
-//	cin >> otherPort;
-//	if (otherPort != 0)
-//	{
-//		RakNet::ConnectionAttemptResult car = peer->Connect("127.0.0.1", otherPort, "BlockChainDemo", (int)strlen("BlockChainDemo"));
-//		cout << "connect result: " << car << endl;
-//		RakAssert(car == RakNet::CONNECTION_ATTEMPT_STARTED);
-//	}
-//#pragma endregion
-//
-//
-//	string message;
-//
-//	while (1)
-//	{
-//		// This sleep keeps RakNet responsive
-//		Sleep(30);
-//
-//
-//
-//		if (kbhit())
-//		{
-//			// Notice what is not here: something to keep our network running.  It's
-//			// fine to block on Gets or anything we want
-//			// Because the network engine was painstakingly written using threads.
-//			cin >> message;
-//			peer->Send(message.c_str(), message.length() + 1, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
-//		}
-//
-//		for (p = peer->Receive(); p; peer->DeallocatePacket(p), p = peer->Receive())
-//		{
-//			// We got a packet, get the identifier with our handy function
-//			packetIdentifier = GetPacketIdentifier(p);
-//
-//			// Check if this is a network message packet
-//			switch (packetIdentifier)
-//			{
-//			case ID_ALREADY_CONNECTED:
-//				// Connection lost normally
-//				printf("ID_ALREADY_CONNECTED with guid %" PRINTF_64_BIT_MODIFIER "u\n", p->guid);
-//				break;
-//			case ID_INCOMPATIBLE_PROTOCOL_VERSION:
-//				printf("ID_INCOMPATIBLE_PROTOCOL_VERSION\n");
-//				break;
-//			case ID_REMOTE_DISCONNECTION_NOTIFICATION: // Server telling the clients of another client disconnecting gracefully.  You can manually broadcast this in a peer to peer enviroment if you want.
-//				printf("ID_REMOTE_DISCONNECTION_NOTIFICATION\n");
-//				break;
-//			case ID_REMOTE_CONNECTION_LOST: // Server telling the clients of another client disconnecting forcefully.  You can manually broadcast this in a peer to peer enviroment if you want.
-//				printf("ID_REMOTE_CONNECTION_LOST\n");
-//				break;
-//			case ID_REMOTE_NEW_INCOMING_CONNECTION: // Server telling the clients of another client connecting.  You can manually broadcast this in a peer to peer enviroment if you want.
-//				printf("ID_REMOTE_NEW_INCOMING_CONNECTION\n");
-//				break;
-//			case ID_CONNECTION_BANNED: // Banned from this server
-//				printf("We are banned from this server.\n");
-//				break;
-//			case ID_CONNECTION_ATTEMPT_FAILED:
-//				printf("Connection attempt failed\n");
-//				break;
-//			case ID_NO_FREE_INCOMING_CONNECTIONS:
-//				// Sorry, the server is full.  I don't do anything here but
-//				// A real app should tell the user
-//				printf("ID_NO_FREE_INCOMING_CONNECTIONS\n");
-//				break;
-//
-//			case ID_INVALID_PASSWORD:
-//				printf("ID_INVALID_PASSWORD\n");
-//				break;
-//
-//			case ID_CONNECTION_REQUEST_ACCEPTED:
-//				// This tells the client they have connected
-//				printf("ID_CONNECTION_REQUEST_ACCEPTED to %s with GUID %s\n", p->systemAddress.ToString(true), p->guid.ToString());
-//				printf("My external address is %s\n", peer->GetExternalID(p->systemAddress).ToString(true));
-//				break;
-//			case ID_CONNECTED_PING:
-//			case ID_UNCONNECTED_PING:
-//				printf("Ping from %s\n", p->systemAddress.ToString(true));
-//				break;
-//			case ID_DISCONNECTION_NOTIFICATION:
-//				// Connection lost normally
-//				printf("ID_DISCONNECTION_NOTIFICATION from %s\n", p->systemAddress.ToString(true));;
-//				break;
-//
-//			case ID_NEW_INCOMING_CONNECTION:
-//				// Somebody connected.  We have their IP now
-//				printf("ID_NEW_INCOMING_CONNECTION from %s with GUID %s\n", p->systemAddress.ToString(true), p->guid.ToString());
-//				peerID = p->systemAddress; // Record the player ID of the client
-//
-//				printf("Remote internal IDs:\n");
-//				for (int index = 0; index < MAXIMUM_NUMBER_OF_INTERNAL_IDS; index++)
-//				{
-//					RakNet::SystemAddress internalId = peer->GetInternalID(p->systemAddress, index);
-//					if (internalId != RakNet::UNASSIGNED_SYSTEM_ADDRESS)
-//					{
-//						printf("%i. %s\n", index + 1, internalId.ToString(true));
-//					}
-//				}
-//
-//				break;
-//
-//			case ID_CONNECTION_LOST:
-//				// Couldn't deliver a reliable packet - i.e. the other system was abnormally
-//				// terminated
-//				printf("ID_CONNECTION_LOST from %s\n", p->systemAddress.ToString(true));;
-//				break;
-//			default:
-//				// It's a client, so just show the message
-//				//printf("%s\n", p->data);
-//				cout << p->data << endl;
-//				break;
-//			}
-//		}
-//
-//	}
-//	peer->Shutdown(300);
-//	// We're done with the network
-//	RakNet::RakPeerInterface::DestroyInstance(peer);
-	return 0;
-
-	vector<int> listOfNodes; //vector of the ports of nodes in the network
-
-	string input;
-	cout << "First node? Initial blockchain? y/n: ";
-	cin >> input;
-
-	if (input == "y" || input == "Y")
-	{
-		cout << "Creating the chain and mining block 0..." << endl;
-		blockchain = new Blockchain(NOZ);
-		cout << *(blockchain->GetChain().back()) << endl;
-
-		cout << "Mining block 1..." << endl;
-		Block b1(1);
-		b1.AddTransaction(t1);
-		b1.AddTransaction(t2);
-		b1.AddTransaction(t3);
-		blockchain->AddBlock(&b1);
-		cout << *(blockchain->GetChain().back())
-			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-
-		cout << "Mining block 2..." << endl;
-		Block b2(2);
-		b2.AddTransaction(t2);
-		b2.AddTransaction(t3);
-		blockchain->AddBlock(&b2);
-		cout << *(blockchain->GetChain().back())
-			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-
-
-		cout << "Mining block 3..." << endl;
-		Block b3(3);
-		b3.AddTransaction(t1);
-		b3.AddTransaction(t2);
-		blockchain->AddBlock(&b3);
-		cout << *(blockchain->GetChain().back())
-			<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-	}
-	else
-	{
-		int inputPorts;
-		int n;
-		cout << "Enter number of nodes in network: ";
-		cin >> n;
-		
-		for (int i = 0; i < n; i++)
+		else if (input == "\\s")
 		{
-			cout << "Enter port of node" << i << " in network: ";
-			cin >> inputPorts;
-			listOfNodes.push_back(inputPorts);
+			node.SendBlockchain();
 		}
-		
-
-	}
-
-	delete blockchain;
-#else// p2p
-
-	std::cout << "* Usage:" << std::endl <<
-		"  [l]isten for a connection" << std::endl <<
-		"  [c]onnect to a remote peer" << std::endl <<
-		"  [s]end a message to the remote peer" << std::endl <<
-		"  [q]uit" << std::endl;
-
-	NetworkNode* peer = new NetworkNode();
-	bool isRunning = true;
-	std::string input;
-
-	while (isRunning)
-	{
-		std::cin >> input;
-
-		if (input == "l")
+		else if (input == "\\i")
 		{
-			peer->Listen();
-		}
-		else if (input == "c")
-		{
-			std::cout << "* Enter the guid of the remote peer:" << std::endl;
-			std::cin >> input;
-			peer->AttemptNatPunchthrough(input);
-		}
+#pragma region Initial blockchain
+			cout << "How many block you want to add into blockchain(0~3)?  \n";
+			int num = 0;
+			cin >> num;
 
-		else if (input == "s")
-		{
-			std::cout << "* Enter message:" << std::endl;;
-			std::cin >> input;
-			peer->SendStringMessage(input);
-		}
+			blockchain = new Blockchain(NOZ);
 
-		else if (input == "q")
-		{
-			isRunning = false;
-		}
+			if (num >= 1)
+			{
+				cout << "Mining block 1..." << endl;
+				blockchain->AddBlock(&b1);
+				cout << *(blockchain->GetChain().back())
+					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+			}
+			if (num >= 2)
+			{
+				cout << "Mining block 2..." << endl;
+				blockchain->AddBlock(&b2);
+				cout << *(blockchain->GetChain().back())
+					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+			}
+			if (num >= 3)
+			{
+				cout << "Mining block 3..." << endl;
+				blockchain->AddBlock(&b3);
+				cout << *(blockchain->GetChain().back())
+					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+			}
 
+			node.SetBlockchain(blockchain);
+#pragma endregion
+
+		}
+		else if (input == "\\b")
+		{
+			cout << *(node.GetBlockchain()) << endl;
+		}
+		else if (input == "\\r")
+		{
+			node.SendRequestForLatestBlockchain();
+		}
 		else
-		{
-			std::cout << "undefined control" << std::endl;
-		}
+			node.SendStringMessage(input);
 	}
 
-	delete peer;
-
-#endif
+	return 0;
 
 #else // local simlutation
 
