@@ -75,6 +75,26 @@ void NetworkNode::SendStringMessage(string message)
 
 }
 
+void NetworkNode::SendTransactions(const Transaction t)
+{
+	std::stringstream ss;
+	ss << t;
+	string message = ss.str();
+	if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
+	{
+		std::cout << "Warning: Transaction too long. TODO: Implement large packet transfer." << std::endl;
+		message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	}
+
+	RakNet::BitStream bs;
+
+	bs.Write(static_cast<unsigned char>(ID_NEW_TRANSACTION));
+	bs.Write(static_cast<unsigned int>(message.size()));
+	bs.Write(message.c_str(), static_cast<unsigned int>(message.size()));
+
+	rakPeer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+}
+
 void NetworkNode::SendBlockchain(RakNet::RakNetGUID guid)
 {
 	std::stringstream ss;

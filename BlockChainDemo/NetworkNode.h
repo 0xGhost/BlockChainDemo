@@ -23,6 +23,7 @@ public:
 
 	void SendStringMessage(string message);
 
+	void SendTransactions(const Transaction t);
 	void SendBlockchain(RakNet::RakNetGUID guid);
 	void SendBlockchain();
 	void SendRequestForLatestBlockchain();

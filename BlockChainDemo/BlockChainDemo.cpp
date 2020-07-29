@@ -198,6 +198,7 @@ int main()
 
 #if 1 // 1 -> networking
 
+	bool isMiner = true;
 
 	Blockchain* blockchain;
 	vector<Player*> players;
@@ -241,7 +242,9 @@ int main()
 		<< "Enter \"\\s\" to boardcast blockchain\n"
 		<< "Enter \"\\i\" to initialize blockchain\n"
 		<< "Enter \"\\b\" to view current blockchain\n"
-		<< "Enter \"\\r\" to request latest blockchain\n";
+		<< "Enter \"\\r\" to request latest blockchain\n"
+		<< "Enter \"\\t\" to add random transactions\n"
+		<< "Enter \"\\m\" to switch between user and miner(default) mode\n";
 
 
 	while (1)
@@ -303,6 +306,30 @@ int main()
 		else if (input == "\\r")
 		{
 			node.SendRequestForLatestBlockchain();
+		}
+
+		else if(input == "\\t")
+		{
+			cout << "Enter how many transactions you want to add into blockchain: ";
+			int num;
+			cin >> num;
+			for (int i = 0; i < num; i++)
+			{
+				int tID = rand() % 3;
+				Transaction* t;
+				switch (tID)
+				{
+				case 0: t = &t1; break;
+				case 1: t = &t2; break;
+				case 2: t = &t3; break;
+				}
+				// TODO: node.NewTransaction(t
+			}
+		}
+		else if (input == "\\m")
+		{
+			isMiner = !isMiner;
+			cout << "now is in " << (isMiner ? "miner" : "user") << " mode" << endl;
 		}
 		else
 			node.SendStringMessage(input);
