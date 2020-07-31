@@ -75,7 +75,7 @@ void NetworkNode::SendStringMessage(string message)
 
 }
 
-void NetworkNode::SendTransactions(const Transaction t)
+void NetworkNode::SendTransaction(const Transaction t)
 {
 	std::stringstream ss;
 	ss << t;
@@ -201,6 +201,41 @@ void NetworkNode::ListenLoop()
 				std::cout << "* ID_REQUEST_BLOCKCHAIN from " << this->packet->systemAddress.ToString(true)
 					<< " with GUID:" << this->packet->guid.ToString() << std::endl;
 				SendBlockchain(this->packet->guid);
+				break;
+			case ID_ADD_NEW_BLOCK:
+			{
+				unsigned char rcv_id;
+				bts.Read(rcv_id);
+				unsigned int length;
+				bts.Read(length);
+				bts.Read(message, length);
+				message[length] = '\0';
+				std::cout << "* ID_ADD_NEW_BLOCK from " << this->packet->systemAddress.ToString(true)
+					<< " with GUID:" << this->packet->guid.ToString() << std::endl;
+				Block *b = new Block(0);
+				std::stringstream ss;
+				ss << message;
+				ss >> *b;
+
+				// if already got this then do nothing else boardcast
+			}
+				break;
+			case ID_NEW_TRANSACTION:
+			{
+				unsigned char rcv_id;
+				bts.Read(rcv_id);
+				unsigned int length;
+				bts.Read(length);
+				bts.Read(message, length);
+				message[length] = '\0';
+				std::cout << "* ID_NEW_TRANSACTION from " << this->packet->systemAddress.ToString(true)
+					<< " with GUID:" << this->packet->guid.ToString() << std::endl;
+				Transaction t;
+				std::stringstream ss;
+				ss << message;
+				ss >> t;
+				// TODO: collect transaction into block
+			}
 				break;
 			case ID_BLOCKCHAIN_DATA:
 			{

@@ -316,14 +316,14 @@ int main()
 			for (int i = 0; i < num; i++)
 			{
 				int tID = rand() % 3;
-				Transaction* t;
+				Transaction* t = &t1;
 				switch (tID)
 				{
 				case 0: t = &t1; break;
 				case 1: t = &t2; break;
 				case 2: t = &t3; break;
 				}
-				// TODO: node.NewTransaction(t
+				node.SendTransaction(*t);
 			}
 		}
 		else if (input == "\\m")
