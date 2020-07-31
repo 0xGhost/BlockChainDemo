@@ -98,6 +98,7 @@ string publicKey = "-----BEGIN PUBLIC KEY-----\n"\
 "-----END PUBLIC KEY-----\n";
 
 extern const int NOZ = 4; // num of zero for the hash
+extern const int NOT = 20; // num of transactions in a block
 
 #define NOM 5 // num of miner
 #define NOB 8 // num of new Block pending
@@ -222,15 +223,68 @@ int main()
 	b1.AddTransaction(t1);
 	b1.AddTransaction(t2);
 	b1.AddTransaction(t3);
+	b1.AddTransaction(t3);
+	b1.AddTransaction(t2); // 5
+	b1.AddTransaction(t1); 
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t3);
+	b1.AddTransaction(t3); // 10
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t3); // 15
+	b1.AddTransaction(t3);
+	b1.AddTransaction(t2);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t1);
+	b1.AddTransaction(t2); // 20
+
 
 	Block b2(2);
 	b2.AddTransaction(t2);
 	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2); // 5
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3); // 10
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2); // 15
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3);
+	b2.AddTransaction(t2);
+	b2.AddTransaction(t3); // 20
 
 	Block b3(3);
 	b3.AddTransaction(t1);
 	b3.AddTransaction(t2);
-
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1); // 5
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2); // 10
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1); // 15
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2);
+	b3.AddTransaction(t1);
+	b3.AddTransaction(t2); // 20
 
 	int port;
 	cout << "Enter port you want to listen on: ";
@@ -239,6 +293,7 @@ int main()
 	NetworkNode node(port);
 
 	cout << "Enter \"\\c\" to connect other node\n"
+		<< "Enter \"\\a\" to mine and boardcast random new block with 20 transactions\n"
 		<< "Enter \"\\s\" to boardcast blockchain\n"
 		<< "Enter \"\\i\" to initialize blockchain\n"
 		<< "Enter \"\\b\" to view current blockchain\n"
@@ -259,6 +314,28 @@ int main()
 			{
 				node.Connect(port);
 			}
+		}
+		else if (input == "\\a")
+		{
+			Block *b = new Block(node.GetBlockchain()->GetChain().size());
+			for (int i = 0; i < NOT; i++)
+			{
+				int tID = rand() % 3;
+				Transaction* t = &t1;
+				switch (tID)
+				{
+				case 0: t = &t1; break;
+				case 1: t = &t2; break;
+				case 2: t = &t3; break;
+				}
+				b->AddTransaction(*t);
+			}
+			cout << "Mining new block......" << endl;
+			node.GetBlockchain()->AddBlock(b);
+			cout << *(node.GetBlockchain()->GetChain().back())
+				<< "Block verify: " << node.GetBlockchain()->GetChain().back()->Verify(NOZ) << endl << endl;
+			node.SendBlock(*b);
+
 		}
 		else if (input == "\\s")
 		{

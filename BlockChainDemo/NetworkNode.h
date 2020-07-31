@@ -24,6 +24,7 @@ public:
 	void SendStringMessage(string message);
 
 	void SendTransaction(const Transaction t);
+	void SendBlock(const Block b);
 	void SendBlockchain(RakNet::RakNetGUID guid);
 	void SendBlockchain();
 	void SendRequestForLatestBlockchain();
@@ -34,7 +35,7 @@ public:
 
 private:
 	// The maximum length for the string messages sent between the peers.
-	const int MAX_USER_MESSAGE_LENGTH = 4096;
+	const int MAX_USER_MESSAGE_LENGTH = 4;
 	const int MAX_CONNECTION = 10;
 
 	RakNet::RakPeerInterface* rakPeer;

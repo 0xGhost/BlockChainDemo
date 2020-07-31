@@ -14,7 +14,7 @@ Block::Block(const unsigned int index) : index(index)
 
 void Block::Mine(const unsigned int numOf0, bool p)
 {
-	hash = "1";
+	hash = sha256(CombineBlockString());
 	string target(numOf0, '0');
 	while (hash.compare(0, numOf0, target) != 0)
 	{

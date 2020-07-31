@@ -59,7 +59,7 @@ void NetworkNode::Connect(const int port)
 void NetworkNode::SendStringMessage(string message)
 {
 	// Just trim the message, just in case.
-	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	//message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
 
 	RakNet::BitStream bs;
 
@@ -80,15 +80,35 @@ void NetworkNode::SendTransaction(const Transaction t)
 	std::stringstream ss;
 	ss << t;
 	string message = ss.str();
-	if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
-	{
-		std::cout << "Warning: Transaction too long. TODO: Implement large packet transfer." << std::endl;
-		message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
-	}
+	//if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
+	//{
+	//	std::cout << "Warning: Transaction too long. TODO: Implement large packet transfer." << std::endl;
+	//	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	//}
 
 	RakNet::BitStream bs;
 
 	bs.Write(static_cast<unsigned char>(ID_NEW_TRANSACTION));
+	bs.Write(static_cast<unsigned int>(message.size()));
+	bs.Write(message.c_str(), static_cast<unsigned int>(message.size()));
+
+	rakPeer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+}
+
+void NetworkNode::SendBlock(const Block b)
+{
+	std::stringstream ss;
+	ss << b;
+	string message = ss.str();
+	//if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
+	//{
+	//	std::cout << "Warning: Block too large. TODO: Implement large packet transfer." << std::endl;
+	//	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	//}
+
+	RakNet::BitStream bs;
+
+	bs.Write(static_cast<unsigned char>(ID_ADD_NEW_BLOCK));
 	bs.Write(static_cast<unsigned int>(message.size()));
 	bs.Write(message.c_str(), static_cast<unsigned int>(message.size()));
 
@@ -100,11 +120,11 @@ void NetworkNode::SendBlockchain(RakNet::RakNetGUID guid)
 	std::stringstream ss;
 	ss << *blockchain;
 	string message = ss.str();
-	if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
-	{
-		std::cout << "Warning: Blockchain too large. TODO: Implement large packet transfer." << std::endl;
-		message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
-	}
+	//if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
+	//{
+	//	std::cout << "Warning: Blockchain too large. TODO: Implement large packet transfer." << std::endl;
+	//	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	//}
 
 	RakNet::BitStream bs;
 
@@ -121,11 +141,11 @@ void NetworkNode::SendBlockchain()
 	std::stringstream ss;
 	ss << *blockchain;
 	string message = ss.str();
-	if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
-	{
-		std::cout << "Warning: Blockchain too large. TODO: Implement large packet transfer." << std::endl;
-		message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
-	}
+	//if (message.size() > this->MAX_USER_MESSAGE_LENGTH)
+	//{
+	//	std::cout << "Warning: Blockchain too large. TODO: Implement large packet transfer." << std::endl;
+	//	message = message.substr(0, this->MAX_USER_MESSAGE_LENGTH);
+	//}
 
 	RakNet::BitStream bs;
 
@@ -150,7 +170,7 @@ void NetworkNode::SendRequestForLatestBlockchain()
 void NetworkNode::ListenLoop()
 {
 	// Allocate the buffer for the incoming message string
-	char* message = new char[this->MAX_USER_MESSAGE_LENGTH + 1];
+	char* message;
 	
 	while (this->isListening)
 	{
@@ -162,6 +182,11 @@ void NetworkNode::ListenLoop()
 			RakNet::BitStream bts(this->packet->data,
 				this->packet->length,
 				false);
+			unsigned char rcv_id;
+			bts.Read(rcv_id);
+			unsigned int length;
+			bts.Read(length);
+			message = new char[length + 1];
 
 			// Check the packet identifier
 			switch (this->packet->data[0])
@@ -175,10 +200,15 @@ void NetworkNode::ListenLoop()
 				break;
 			
 			case ID_USER_PACKET_ENUM:
-				unsigned char rcv_id;
-				bts.Read(rcv_id);
-				unsigned int length;
-				bts.Read(length);
+				//unsigned char rcv_id;
+				//bts.Read(rcv_id);
+				//unsigned int length;
+				//bts.Read(length);
+				//if (length >= this->MAX_USER_MESSAGE_LENGTH)
+				//{
+				//	delete[] message;
+				//	message = new char[length + 1];
+				//}
 				bts.Read(message, length);
 				message[length] = '\0';
 				std::cout << "* Message received:" << std::endl <<
@@ -204,28 +234,51 @@ void NetworkNode::ListenLoop()
 				break;
 			case ID_ADD_NEW_BLOCK:
 			{
-				unsigned char rcv_id;
-				bts.Read(rcv_id);
-				unsigned int length;
-				bts.Read(length);
+				//unsigned char rcv_id;
+				//bts.Read(rcv_id);
+				//unsigned int length;
+				//bts.Read(length);
 				bts.Read(message, length);
 				message[length] = '\0';
 				std::cout << "* ID_ADD_NEW_BLOCK from " << this->packet->systemAddress.ToString(true)
 					<< " with GUID:" << this->packet->guid.ToString() << std::endl;
-				Block *b = new Block(0);
+				Block* b = new Block(0);
 				std::stringstream ss;
 				ss << message;
 				ss >> *b;
-
-				// if already got this then do nothing else boardcast
+				if (b->GetIndex() >= blockchain->GetChain().size())
+				{
+					if (b->GetIndex() == blockchain->GetChain().size())
+					{
+						b->SetPrevBlock(*blockchain->GetChain().back());
+						if (b->Verify(NOZ))
+						{
+							blockchain->AddBlock(b);
+							std::cout << "new block added into blockchain\n";
+							SendBlock(*b);
+						}
+						else
+						{
+							std::cout << "new block not pass verify.\n";
+						}
+					}
+					else
+					{
+						std::cout << "current blockchain out of date. Please request for the latest one.\n";
+					}
+				}
+				else
+				{
+					std::cout << "old block ignored\n";
+				}
 			}
 				break;
 			case ID_NEW_TRANSACTION:
 			{
-				unsigned char rcv_id;
-				bts.Read(rcv_id);
-				unsigned int length;
-				bts.Read(length);
+				//unsigned char rcv_id;
+				//bts.Read(rcv_id);
+				//unsigned int length;
+				//bts.Read(length);
 				bts.Read(message, length);
 				message[length] = '\0';
 				std::cout << "* ID_NEW_TRANSACTION from " << this->packet->systemAddress.ToString(true)
@@ -239,11 +292,11 @@ void NetworkNode::ListenLoop()
 				break;
 			case ID_BLOCKCHAIN_DATA:
 			{
-				Blockchain* newChain = new Blockchain();
-				unsigned char rcv_id;
-				bts.Read(rcv_id);
-				unsigned int length;
-				bts.Read(length);
+				Blockchain* newChain = new Blockchain(NOZ);
+				//unsigned char rcv_id;
+				//bts.Read(rcv_id);
+				//unsigned int length;
+				//bts.Read(length);
 				bts.Read(message, length);
 				message[length] = '\0';
 				std::cout << "* Blockchain received from " << this->packet->systemAddress.ToString(true)
@@ -275,8 +328,8 @@ void NetworkNode::ListenLoop()
 				std::cout << packet->data << std::endl;
 				break;
 			} // check package identifier
+			delete[] message;
 		} // package receive loop
 	} // listening loop
 
-	delete[] message;
 }

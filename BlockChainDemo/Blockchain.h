@@ -8,7 +8,7 @@ using std::vector;
 class Blockchain
 {
 public:
-	Blockchain(const unsigned int num = 0);
+	Blockchain(const unsigned int num = 4);
 	~Blockchain() { }
 
 	void AddBlock(Block* newBlock);
