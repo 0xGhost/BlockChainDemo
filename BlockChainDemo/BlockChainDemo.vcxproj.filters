@@ -375,6 +375,9 @@
     <ClCompile Include="NetworkNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MSTimeStamp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Block.h">
@@ -861,6 +864,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleNetwork.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MSTimeStamp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

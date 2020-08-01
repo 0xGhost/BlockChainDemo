@@ -1,4 +1,5 @@
 // Yiang Lu 03/05/2020
+
 #include "Block.h"
 #include "SHA256.h"
 #include <sstream>
@@ -7,8 +8,11 @@
 Block::Block(const unsigned int index) : index(index)
 {
 	nonce = 0;
-	timeStamp = 0;
+	timeStamp = index == 0 ? "NA" : getTimestamp();
+	//timeStamp = getTimestamp();
 	prevBlock = nullptr;
+	//timeStamp = "QUQ";
+
 	//timeStamp = time(nullptr);
 }
 
@@ -44,8 +48,9 @@ bool Block::Verify(const unsigned int numOf0) const
 	return hash.compare(0, numOf0, target) == 0;
 }
 
-void Block::AddTransaction(const Transaction t)
+void Block::AddTransaction(Transaction t, bool resetTime)
 {
+	if (resetTime) t.RestTimeStamp();
 	data.push_back(t);
 }
 
@@ -55,7 +60,7 @@ string Block::CombineBlockString() const
 	string blockStr;
 	sstr << index << nonce;
 	for (Transaction t : data)
-		sstr << t.GetMessage();
+		sstr << t.GetMessageString();
 	sstr << GetPrevHash() << timeStamp;
 	sstr >> blockStr;
 	return blockStr;

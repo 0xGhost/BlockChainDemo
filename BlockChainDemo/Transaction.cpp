@@ -4,18 +4,20 @@
 #include "RSATool.h"
 #include <iostream>
 #include <sstream>
+#include <Windows.h>
 
 Transaction::Transaction(Player* oldOwner, Player* newOwner, string item) 
 	: oldOwner(oldOwner), newOwner(newOwner), item(item) 
 {
+	timeStamp = TimeStamp();
 }
 
 bool Transaction::Verify() const
 {
-	return RSATool::VerifySignature(oldOwner->GetPublicKey(), GetMessage(), signature);
+	return RSATool::VerifySignature(oldOwner->GetPublicKey(), GetMessageString(), signature);
 }
 
-string Transaction::GetMessage() const
+string Transaction::GetMessageString() const
 {
 	if (item.size() <= 0)
 	{
@@ -23,9 +25,16 @@ string Transaction::GetMessage() const
 	}
 	std::stringstream sstr;
 	string message;
-	sstr << oldOwner->GetName() << newOwner->GetName() << item;
+	sstr << oldOwner->GetName() << newOwner->GetName() << item << timeStamp.ToString();
 	sstr >> message;
 	return message;
+}
+
+void Transaction::RestTimeStamp()
+{
+	timeStamp = TimeStamp();
+	oldOwner->Sign(*this); // fake sign
+	Sleep(1);
 }
 
 std::ostream& operator<<(std::ostream& out, const Transaction& t)
@@ -36,7 +45,7 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 	}
 	else
 	{
-		out << "Tx: " << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << "    Authentic: " << std::boolalpha << t.Verify();// << "\nSignature:" << t.signature;
+		out << "Tx: " << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << " time: " << t.timeStamp.ToString() << "    Authentic: " << std::boolalpha << t.Verify();// << "\nSignature:" << t.signature;
 		//if (!t.Verify())
 		//{
 		//	out << " signature:" << t.signature;
@@ -45,13 +54,13 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 	return out;
 }
 
-std::istream& operator>>(std::istream& in, Transaction& b)
+std::istream& operator>>(std::istream& in, Transaction& t)
 {
 	string temp, oldOwnerName, newOwnerName;
-	in >> temp >> oldOwnerName >> temp >> b.item >> temp >> newOwnerName >> temp >> temp;
-	b.oldOwner = new Player(oldOwnerName);
-	b.newOwner = new Player(newOwnerName);
-	b.oldOwner->Sign(b); // fake sign
+	in >> temp >> oldOwnerName >> temp >> t.item >> temp >> newOwnerName >> temp >> t.timeStamp.ToString() >> temp >> temp;
+	t.oldOwner = new Player(oldOwnerName);
+	t.newOwner = new Player(newOwnerName);
+	t.oldOwner->Sign(t); // fake sign
 	// TODO: the owner should store public key
 	return in;
 }

@@ -267,6 +267,7 @@
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Blockchain.cpp" />
     <ClCompile Include="BlockChainDemo.cpp" />
+    <ClCompile Include="MSTimeStamp.cpp" />
     <ClCompile Include="NetworkNode.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RSATool.cpp" />
@@ -430,6 +431,7 @@
     <ClInclude Include="..\..\RakNet\Source\_FindFirst.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Blockchain.h" />
+    <ClInclude Include="MSTimeStamp.h" />
     <ClInclude Include="NetworkNode.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RSATool.h" />

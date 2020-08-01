@@ -10,6 +10,7 @@ Blockchain::Blockchain(const unsigned int num) : numOf0(num)
 
 void Blockchain::AddBlock(Block* newBlock)
 {
+	//newBlock->SetIndex(chain.size());
 	newBlock->SetPrevBlock(*chain.back());
 	newBlock->Mine(numOf0);
 	chain.push_back(newBlock);

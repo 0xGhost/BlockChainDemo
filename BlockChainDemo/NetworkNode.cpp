@@ -1,10 +1,14 @@
 #include "NetworkNode.h"
 #include <sstream>
+
 extern const int NOZ;
+extern const int NOT;
 
 
 NetworkNode::NetworkNode(const int port)
 {
+	std::cout << "Initializing blockchain..." << std::endl;
+
 	blockchain = new Blockchain(NOZ);
 
 	this->rakPeer = RakNet::RakPeerInterface::GetInstance();
@@ -45,6 +49,55 @@ NetworkNode::~NetworkNode()
 	// Cleanup...
 	RakNet::RakPeerInterface::DestroyInstance(this->rakPeer);
 	delete this->packet;
+}
+
+void NetworkNode::CollectNewTransaction(const Transaction t)
+{
+	if (t.Verify())
+	{
+		TimeStamp* lastTransactionTime = nullptr;
+		if (newBlock == nullptr)
+		{
+			newBlock = new Block(blockchain->GetChain().size());
+
+			if (blockchain->GetChain().back()->GetData().size() > 0)
+			{
+				lastTransactionTime = &(blockchain->GetChain().back()->GetData().back().GetTimeStamp());
+			}
+		}
+		else
+		{
+			lastTransactionTime = &newBlock->GetData().back().GetTimeStamp();
+		}
+
+
+		if (newBlock->GetData().size() >= NOT)
+		{
+			std::cout << "New block have enough transactions. Mining...\n";
+			newBlock->SetIndex(blockchain->GetChain().size());
+			blockchain->AddBlock(newBlock);
+			std::cout << "New block mined. Boardcast new block.\n";
+			SendBlock(*newBlock);
+			newBlock = new Block(blockchain->GetChain().size());
+		}
+
+		if (lastTransactionTime != nullptr)
+		{
+			if (t.GetTimeStamp().compare(*lastTransactionTime) <= 0)
+			{
+				std::cout << "Skip old Transaction. \n";
+				return;
+			}
+		}
+		
+		newBlock->AddTransaction(t);
+		std::cout << "New transaction added into pending block.\n";
+		SendTransaction(t);
+	}
+	else
+	{
+		std::cout << "Transaction not verified." << std::endl;
+	}
 }
 
 void NetworkNode::Connect(const int port)
@@ -287,7 +340,7 @@ void NetworkNode::ListenLoop()
 				std::stringstream ss;
 				ss << message;
 				ss >> t;
-				// TODO: collect transaction into block
+				CollectNewTransaction(t);
 			}
 				break;
 			case ID_BLOCKCHAIN_DATA:

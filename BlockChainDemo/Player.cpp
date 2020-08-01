@@ -4,7 +4,7 @@
 
 void Player::Sign(Transaction& t) const
 {
-	t.SetSignature(GenerateSignature(t.GetMessage()));
+	t.SetSignature(GenerateSignature(t.GetMessageString()));
 }
 
 char* Player::GenerateSignature(string message) const

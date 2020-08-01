@@ -44,6 +44,7 @@
 #include "SecureHandshake.h" // Include header for secure handshake
 #endif
 
+//#include "MSTimeStamp.h"
 #include "NetworkNode.h"
 #include "Blockchain.h"
 #include "RSATool.h"
@@ -102,6 +103,10 @@ extern const int NOT = 20; // num of transactions in a block
 
 #define NOM 5 // num of miner
 #define NOB 8 // num of new Block pending
+
+//#define LOCAL_SIMULATION 
+
+#ifdef LOCAL_SIMULATION
 Blockchain myBlockChain(NOZ);
 int newBlockAdded = 0; // the newest block message boardcast through miners  
 thread miners[NOM];
@@ -179,6 +184,8 @@ void CheaterFunc(Blockchain* blockchain, Block** newBlocks)
 //	}
 //}
 
+#endif
+
 unsigned char GetPacketIdentifier(RakNet::Packet* p)
 {
 	if (p == 0)
@@ -195,9 +202,7 @@ unsigned char GetPacketIdentifier(RakNet::Packet* p)
 
 int main()
 {
-	
-
-#if 1 // 1 -> networking
+#ifndef LOCAL_SIMULATION
 
 	bool isMiner = true;
 
@@ -220,71 +225,71 @@ int main()
 	bob.Sign(t3);
 
 	Block b1(1);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t3);
-	b1.AddTransaction(t3);
-	b1.AddTransaction(t2); // 5
-	b1.AddTransaction(t1); 
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t3);
-	b1.AddTransaction(t3); // 10
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t3); // 15
-	b1.AddTransaction(t3);
-	b1.AddTransaction(t2);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t1);
-	b1.AddTransaction(t2); // 20
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t2, true);
+	b1.AddTransaction(t3, true);
+	b1.AddTransaction(t3, true);
+	b1.AddTransaction(t2, true); // 5
+	b1.AddTransaction(t1, true); 
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t2, true);
+	b1.AddTransaction(t3, true);
+	b1.AddTransaction(t3, true); // 10
+	b1.AddTransaction(t2, true);
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t2, true);
+	b1.AddTransaction(t3, true); // 15
+	b1.AddTransaction(t3, true);
+	b1.AddTransaction(t2, true);
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t1, true);
+	b1.AddTransaction(t2, true); // 20
 
 
 	Block b2(2);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2); // 5
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3); // 10
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2); // 15
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3);
-	b2.AddTransaction(t2);
-	b2.AddTransaction(t3); // 20
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true); // 5
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true); // 10
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true); // 15
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true);
+	b2.AddTransaction(t2, true);
+	b2.AddTransaction(t3, true); // 20
 
 	Block b3(3);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1); // 5
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2); // 10
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1); // 15
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2);
-	b3.AddTransaction(t1);
-	b3.AddTransaction(t2); // 20
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true); // 5
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true); // 10
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true); // 15
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true);
+	b3.AddTransaction(t1, true);
+	b3.AddTransaction(t2, true); // 20
 
 	int port;
 	cout << "Enter port you want to listen on: ";
@@ -293,12 +298,13 @@ int main()
 	NetworkNode node(port);
 
 	cout << "Enter \"\\c\" to connect other node\n"
-		<< "Enter \"\\a\" to mine and boardcast random new block with 20 transactions\n"
+		<< "Enter \"\\a\" to mine and boardcast new block with 20 random transactions\n"
 		<< "Enter \"\\s\" to boardcast blockchain\n"
 		<< "Enter \"\\i\" to initialize blockchain\n"
 		<< "Enter \"\\b\" to view current blockchain\n"
+		<< "Enter \"\\p\" to view current pending block\n"
 		<< "Enter \"\\r\" to request latest blockchain\n"
-		<< "Enter \"\\t\" to add random transactions\n"
+		<< "Enter \"\\t\" to boardcast random transactions (simulate user)\n"
 		<< "Enter \"\\m\" to switch between user and miner(default) mode\n";
 
 
@@ -322,13 +328,16 @@ int main()
 			{
 				int tID = rand() % 3;
 				Transaction* t = &t1;
+				std::stringstream ss;
 				switch (tID)
 				{
 				case 0: t = &t1; break;
 				case 1: t = &t2; break;
 				case 2: t = &t3; break;
 				}
-				b->AddTransaction(*t);
+				b->AddTransaction(*t, true);
+
+				//b->AddTransaction(*t);
 			}
 			cout << "Mining new block......" << endl;
 			node.GetBlockchain()->AddBlock(b);
@@ -347,7 +356,7 @@ int main()
 			cout << "How many block you want to add into blockchain(0~3)?  \n";
 			int num = 0;
 			cin >> num;
-
+			cout << "Initializing blockchain..." << endl;
 			blockchain = new Blockchain(NOZ);
 
 			if (num >= 1)
@@ -380,6 +389,13 @@ int main()
 		{
 			cout << *(node.GetBlockchain()) << endl;
 		}
+		else if (input == "\\p")
+		{
+			if (node.GetPendingBlock() != nullptr)
+				cout << *(node.GetPendingBlock()) << endl;
+			else
+				cout << "No pending Block" << endl;
+		}
 		else if (input == "\\r")
 		{
 			node.SendRequestForLatestBlockchain();
@@ -387,7 +403,7 @@ int main()
 
 		else if(input == "\\t")
 		{
-			cout << "Enter how many transactions you want to add into blockchain: ";
+			cout << "Enter how many transactions you want to boardcast: ";
 			int num;
 			cin >> num;
 			for (int i = 0; i < num; i++)
@@ -400,6 +416,8 @@ int main()
 				case 1: t = &t2; break;
 				case 2: t = &t3; break;
 				}
+				t->RestTimeStamp();
+				node.CollectNewTransaction(*t);
 				node.SendTransaction(*t);
 			}
 		}

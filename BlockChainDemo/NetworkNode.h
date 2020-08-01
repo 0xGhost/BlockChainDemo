@@ -18,6 +18,7 @@ public:
 	NetworkNode(const int port = -1); // -1 means using random port
 	~NetworkNode();
 	
+	void CollectNewTransaction(const Transaction t);
 
 	void Connect(const int port);
 
@@ -29,7 +30,8 @@ public:
 	void SendBlockchain();
 	void SendRequestForLatestBlockchain();
 
-	Blockchain* GetBlockchain() { return blockchain; }
+	Blockchain* GetBlockchain() const { return blockchain; }
+	Block* GetPendingBlock() const { return newBlock; }
 
 	void SetBlockchain(Blockchain* bc) { delete blockchain; blockchain = bc; }
 
@@ -42,7 +44,8 @@ private:
 	RakNet::Packet* packet;
 	RakNet::RakNetGUID GUID;
 
-	Blockchain *blockchain;
+	Blockchain* blockchain;
+	Block* newBlock;
 
 	// The C++11 thread for receiving packets in the background.
 	std::thread* listenLoopThread;

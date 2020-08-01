@@ -1,6 +1,7 @@
 // Yiang Lu 05/05/2020
 #pragma once
 #include <string>
+#include "MSTimeStamp.h"
 
 using std::string;
 class Player;
@@ -16,9 +17,11 @@ public:
 	Player* GetOldOwner()	const	{ return oldOwner; }
 	Player* GetNewOwner()	const	{ return newOwner; }
 	string	GetItem()		const	{ return item; }
+	TimeStamp GetTimeStamp() const	{ return timeStamp; }
 
-	string GetMessage() const;
+	string GetMessageString() const;
 
+	void RestTimeStamp(); // only for test
 	void SetSignature(char* s) { signature = s; }
 
 	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
@@ -27,6 +30,7 @@ public:
 private:
 	Player *oldOwner = nullptr;
 	Player *newOwner = nullptr;
+	TimeStamp timeStamp;
 	string item;
 	char* signature;
 };
