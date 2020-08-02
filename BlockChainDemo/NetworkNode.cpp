@@ -51,14 +51,19 @@ NetworkNode::~NetworkNode()
 	delete this->packet;
 }
 
-void NetworkNode::CollectNewTransaction(const Transaction t)
+bool NetworkNode::CollectNewTransaction(const Transaction t)
 {
 	if (t.Verify())
 	{
 		TimeStamp* lastTransactionTime = nullptr;
-		if (newBlock == nullptr)
+		if (pendingTransactions.size() > 0)
 		{
-			newBlock = new Block(blockchain->GetChain().size());
+			lastTransactionTime = &pendingTransactions.back().GetTimeStamp();
+		}
+
+		/*if (pendingBlock == nullptr)
+		{
+			pendingBlock = new Block(blockchain->GetChain().size());
 
 			if (blockchain->GetChain().back()->GetData().size() > 0)
 			{
@@ -67,37 +72,71 @@ void NetworkNode::CollectNewTransaction(const Transaction t)
 		}
 		else
 		{
-			lastTransactionTime = &newBlock->GetData().back().GetTimeStamp();
-		}
+			lastTransactionTime = &pendingBlock->GetData().back().GetTimeStamp();
+		}*/
 
 
-		if (newBlock->GetData().size() >= NOT)
-		{
-			std::cout << "New block have enough transactions. Mining...\n";
-			newBlock->SetIndex(blockchain->GetChain().size());
-			blockchain->AddBlock(newBlock);
-			std::cout << "New block mined. Boardcast new block.\n";
-			SendBlock(*newBlock);
-			newBlock = new Block(blockchain->GetChain().size());
-		}
+		//if (pendingBlock->GetData().size() >= NOT)
+		//{
+		//	std::cout << "New block have enough transactions. Mining...\n";
+		//	pendingBlock->SetIndex(blockchain->GetChain().size());
+		//	blockchain->AddBlock(pendingBlock);
+		//	std::cout << "New block mined. Boardcast new block.\n";
+		//	SendBlock(*pendingBlock);
+		//	pendingBlock = new Block(blockchain->GetChain().size());
+		//}
 
 		if (lastTransactionTime != nullptr)
 		{
 			if (t.GetTimeStamp().compare(*lastTransactionTime) <= 0)
 			{
 				std::cout << "Skip old Transaction. \n";
-				return;
+				return false;
 			}
 		}
 		
-		newBlock->AddTransaction(t);
-		std::cout << "New transaction added into pending block.\n";
-		SendTransaction(t);
+		//pendingBlock->AddTransaction(t);
+
+		pendingTransactions.push_back(t);
+
+		std::cout << "New transaction added into pending transaction queue.\n";
+		return true;
+		//SendTransaction(t);
 	}
 	else
 	{
 		std::cout << "Transaction not verified." << std::endl;
+		return false;
 	}
+}
+
+void NetworkNode::PendingBlockCheck()
+{
+	if (pendingTransactions.size() >= 20)
+	{
+		pendingBlock = new Block(blockchain->GetChain().size());
+		for (int i = 0; i < NOT; i++)
+		{
+			pendingBlock->AddTransaction(pendingTransactions.back());
+			pendingTransactions.pop_back();
+		}
+		std::cout << "Pending block have enough transactions. Mining...\n";
+		pendingBlock->SetIndex(blockchain->GetChain().size());
+		blockchain->AddBlock(pendingBlock);
+
+		std::cout << "Pending block mined. Boardcast new block.\n";
+		SendBlock(*pendingBlock);
+	}
+
+	/*if (pendingBlock != nullptr && pendingBlock->GetData().size() >= NOT)
+	{
+		std::cout << "New block have enough transactions. Mining...\n";
+		pendingBlock->SetIndex(blockchain->GetChain().size());
+		blockchain->AddBlock(pendingBlock);
+		std::cout << "New block mined. Boardcast new block.\n";
+		SendBlock(*pendingBlock);
+		pendingBlock = new Block(blockchain->GetChain().size());
+	}*/
 }
 
 void NetworkNode::Connect(const int port)
@@ -340,7 +379,8 @@ void NetworkNode::ListenLoop()
 				std::stringstream ss;
 				ss << message;
 				ss >> t;
-				CollectNewTransaction(t);
+				if(CollectNewTransaction(t)) 
+					SendTransaction(t);
 			}
 				break;
 			case ID_BLOCKCHAIN_DATA:

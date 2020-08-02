@@ -13,7 +13,8 @@ void Blockchain::AddBlock(Block* newBlock)
 	//newBlock->SetIndex(chain.size());
 	newBlock->SetPrevBlock(*chain.back());
 	newBlock->Mine(numOf0);
-	chain.push_back(newBlock);
+	if(chain.size() == newBlock->GetIndex())
+		chain.push_back(newBlock);
 }
 
 std::ostream& operator<<(std::ostream& out, const Blockchain& bc)

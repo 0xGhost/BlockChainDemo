@@ -1,5 +1,22 @@
 #include "MSTimeStamp.h"
 
+std::ostream& operator<<(std::ostream& out, const TimeStamp& ts)
+{
+	out << ts.ToString();
+	return out;
+}
+
+std::istream& operator>>(std::istream& in, TimeStamp& ts)
+{
+	std::tm t;
+	int i;
+	in >> std::get_time(&t, "%a/%b/%d/%Y/%T.") >> i;
+	ts.nowAsTimeT = mktime(&t);
+	ts.nowMs = std::chrono::milliseconds(i);
+	ts.now = std::chrono::system_clock::from_time_t(ts.nowAsTimeT);
+	return in;
+}
+
 std::string getTimestamp() {
 	// get a precise timestamp as a string
 	const auto now = std::chrono::system_clock::now();

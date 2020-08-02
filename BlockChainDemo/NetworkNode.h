@@ -1,5 +1,5 @@
 #pragma once
-
+#include <queue>
 #include <string>
 #include <thread>
 #include <iostream>
@@ -18,7 +18,8 @@ public:
 	NetworkNode(const int port = -1); // -1 means using random port
 	~NetworkNode();
 	
-	void CollectNewTransaction(const Transaction t);
+	bool CollectNewTransaction(const Transaction t);
+	void PendingBlockCheck();
 
 	void Connect(const int port);
 
@@ -31,7 +32,8 @@ public:
 	void SendRequestForLatestBlockchain();
 
 	Blockchain* GetBlockchain() const { return blockchain; }
-	Block* GetPendingBlock() const { return newBlock; }
+	Block* GetPendingBlock() const { return pendingBlock; }
+	std::deque<Transaction> GetPendingTransactions() const { return pendingTransactions; }
 
 	void SetBlockchain(Blockchain* bc) { delete blockchain; blockchain = bc; }
 
@@ -45,7 +47,8 @@ private:
 	RakNet::RakNetGUID GUID;
 
 	Blockchain* blockchain;
-	Block* newBlock;
+	Block* pendingBlock;
+	std::deque<Transaction> pendingTransactions;
 
 	// The C++11 thread for receiving packets in the background.
 	std::thread* listenLoopThread;

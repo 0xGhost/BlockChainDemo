@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 	}
 	else
 	{
-		out << "Tx: " << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << " time: " << t.timeStamp.ToString() << "    Authentic: " << std::boolalpha << t.Verify();// << "\nSignature:" << t.signature;
+		out << "Tx: " << t.oldOwner->GetName() << " gives " << t.item << " to " << t.newOwner->GetName() << " time: " << t.timeStamp << "    Authentic: " << std::boolalpha << t.Verify();// << "\nSignature:" << t.signature;
 		//if (!t.Verify())
 		//{
 		//	out << " signature:" << t.signature;
@@ -57,7 +57,7 @@ std::ostream& operator<<(std::ostream& out, const Transaction& t)
 std::istream& operator>>(std::istream& in, Transaction& t)
 {
 	string temp, oldOwnerName, newOwnerName;
-	in >> temp >> oldOwnerName >> temp >> t.item >> temp >> newOwnerName >> temp >> t.timeStamp.ToString() >> temp >> temp;
+	in >> temp >> oldOwnerName >> temp >> t.item >> temp >> newOwnerName >> temp >> t.timeStamp >> temp >> temp;
 	t.oldOwner = new Player(oldOwnerName);
 	t.newOwner = new Player(newOwnerName);
 	t.oldOwner->Sign(t); // fake sign

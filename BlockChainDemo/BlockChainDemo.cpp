@@ -202,6 +202,20 @@ unsigned char GetPacketIdentifier(RakNet::Packet* p)
 
 int main()
 {
+	//string s = TimeStamp().ToString();
+	//cout << s << endl;
+
+	//std::tm t;
+	//std::istringstream ss(s);
+	//int i;
+	//ss >> std::get_time(&t, "%a/%b/%d/%Y/%T.") >>i;
+	//long long time;
+	//time = mktime(&t);
+	//std::chrono::milliseconds ms(i);
+	//std::ostringstream os;
+	//std::cout << std::put_time(std::localtime(&time), "%a/%b/%d/%Y/%T") <<"." <<ms.count()<<  std::endl;
+
+	//return  0;
 #ifndef LOCAL_SIMULATION
 
 	bool isMiner = true;
@@ -302,132 +316,140 @@ int main()
 		<< "Enter \"\\s\" to boardcast blockchain\n"
 		<< "Enter \"\\i\" to initialize blockchain\n"
 		<< "Enter \"\\b\" to view current blockchain\n"
-		<< "Enter \"\\p\" to view current pending block\n"
+		<< "Enter \"\\p\" to view current pending transaction\n"
 		<< "Enter \"\\r\" to request latest blockchain\n"
-		<< "Enter \"\\t\" to boardcast random transactions (simulate user)\n"
-		<< "Enter \"\\m\" to switch between user and miner(default) mode\n";
+		<< "Enter \"\\t\" to boardcast random transactions (simulate user)\n";
+		//<< "Enter \"\\m\" to switch between user and miner(default) mode\n";
 
 
 	while (1)
 	{
-		string input;
-		cin >> input;
-		if (input == "\\c")
+		if (kbhit())
 		{
-			cout << "Enter port you want to connect: (0 to skip)";
-			cin >> port;
-			if (port != 0)
+			string input;
+			cin >> input;
+			if (input == "\\c")
 			{
-				node.Connect(port);
-			}
-		}
-		else if (input == "\\a")
-		{
-			Block *b = new Block(node.GetBlockchain()->GetChain().size());
-			for (int i = 0; i < NOT; i++)
-			{
-				int tID = rand() % 3;
-				Transaction* t = &t1;
-				std::stringstream ss;
-				switch (tID)
+				cout << "Enter port you want to connect: (0 to skip)";
+				cin >> port;
+				if (port != 0)
 				{
-				case 0: t = &t1; break;
-				case 1: t = &t2; break;
-				case 2: t = &t3; break;
+					node.Connect(port);
 				}
-				b->AddTransaction(*t, true);
-
-				//b->AddTransaction(*t);
 			}
-			cout << "Mining new block......" << endl;
-			node.GetBlockchain()->AddBlock(b);
-			cout << *(node.GetBlockchain()->GetChain().back())
-				<< "Block verify: " << node.GetBlockchain()->GetChain().back()->Verify(NOZ) << endl << endl;
-			node.SendBlock(*b);
+			else if (input == "\\a")
+			{
+				Block* b = new Block(node.GetBlockchain()->GetChain().size());
+				for (int i = 0; i < NOT; i++)
+				{
+					int tID = rand() % 3;
+					Transaction* t = &t1;
+					std::stringstream ss;
+					switch (tID)
+					{
+					case 0: t = &t1; break;
+					case 1: t = &t2; break;
+					case 2: t = &t3; break;
+					}
+					b->AddTransaction(*t, true);
 
-		}
-		else if (input == "\\s")
-		{
-			node.SendBlockchain();
-		}
-		else if (input == "\\i")
-		{
+					//b->AddTransaction(*t);
+				}
+				cout << "Mining new block......" << endl;
+				node.GetBlockchain()->AddBlock(b);
+				cout << *(node.GetBlockchain()->GetChain().back())
+					<< "Block verify: " << node.GetBlockchain()->GetChain().back()->Verify(NOZ) << endl << endl;
+				node.SendBlock(*b);
+
+			}
+			else if (input == "\\s")
+			{
+				node.SendBlockchain();
+			}
+			else if (input == "\\i")
+			{
 #pragma region Initial blockchain
-			cout << "How many block you want to add into blockchain(0~3)?  \n";
-			int num = 0;
-			cin >> num;
-			cout << "Initializing blockchain..." << endl;
-			blockchain = new Blockchain(NOZ);
+				cout << "How many block you want to add into blockchain(0~3)?  \n";
+				int num = 0;
+				cin >> num;
+				cout << "Initializing blockchain..." << endl;
+				blockchain = new Blockchain(NOZ);
 
-			if (num >= 1)
-			{
-				cout << "Mining block 1..." << endl;
-				blockchain->AddBlock(&b1);
-				cout << *(blockchain->GetChain().back())
-					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-			}
-			if (num >= 2)
-			{
-				cout << "Mining block 2..." << endl;
-				blockchain->AddBlock(&b2);
-				cout << *(blockchain->GetChain().back())
-					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-			}
-			if (num >= 3)
-			{
-				cout << "Mining block 3..." << endl;
-				blockchain->AddBlock(&b3);
-				cout << *(blockchain->GetChain().back())
-					<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
-			}
+				if (num >= 1)
+				{
+					cout << "Mining block 1..." << endl;
+					blockchain->AddBlock(&b1);
+					cout << *(blockchain->GetChain().back())
+						<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+				}
+				if (num >= 2)
+				{
+					cout << "Mining block 2..." << endl;
+					blockchain->AddBlock(&b2);
+					cout << *(blockchain->GetChain().back())
+						<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+				}
+				if (num >= 3)
+				{
+					cout << "Mining block 3..." << endl;
+					blockchain->AddBlock(&b3);
+					cout << *(blockchain->GetChain().back())
+						<< "Block verify: " << blockchain->GetChain().back()->Verify(NOZ) << endl << endl;
+				}
 
-			node.SetBlockchain(blockchain);
+				node.SetBlockchain(blockchain);
 #pragma endregion
 
-		}
-		else if (input == "\\b")
-		{
-			cout << *(node.GetBlockchain()) << endl;
-		}
-		else if (input == "\\p")
-		{
-			if (node.GetPendingBlock() != nullptr)
-				cout << *(node.GetPendingBlock()) << endl;
-			else
-				cout << "No pending Block" << endl;
-		}
-		else if (input == "\\r")
-		{
-			node.SendRequestForLatestBlockchain();
-		}
-
-		else if(input == "\\t")
-		{
-			cout << "Enter how many transactions you want to boardcast: ";
-			int num;
-			cin >> num;
-			for (int i = 0; i < num; i++)
-			{
-				int tID = rand() % 3;
-				Transaction* t = &t1;
-				switch (tID)
-				{
-				case 0: t = &t1; break;
-				case 1: t = &t2; break;
-				case 2: t = &t3; break;
-				}
-				t->RestTimeStamp();
-				node.CollectNewTransaction(*t);
-				node.SendTransaction(*t);
 			}
+			else if (input == "\\b")
+			{
+				cout << *(node.GetBlockchain()) << endl;
+			}
+			else if (input == "\\p")
+			{
+				if (node.GetPendingTransactions().size() > 0)
+				{
+					for (Transaction t : node.GetPendingTransactions())
+						cout << t << endl;
+				}
+				else
+					cout << "No pending transcation" << endl;
+			}
+			else if (input == "\\r")
+			{
+				node.SendRequestForLatestBlockchain();
+			}
+
+			else if (input == "\\t")
+			{
+				cout << "Enter how many transactions you want to boardcast: ";
+				int num;
+				cin >> num;
+				for (int i = 0; i < num; i++)
+				{
+					int tID = rand() % 3;
+					Transaction* t = &t1;
+					switch (tID)
+					{
+					case 0: t = &t1; break;
+					case 1: t = &t2; break;
+					case 2: t = &t3; break;
+					}
+					t->RestTimeStamp();
+					node.CollectNewTransaction(*t);
+					node.SendTransaction(*t);
+					//cout << *t << endl;
+				}
+			}
+			//else if (input == "\\m")
+			//{
+			//	isMiner = !isMiner;
+			//	cout << "now is in " << (isMiner ? "miner" : "user") << " mode" << endl;
+			//}
+			else
+				node.SendStringMessage(input);
 		}
-		else if (input == "\\m")
-		{
-			isMiner = !isMiner;
-			cout << "now is in " << (isMiner ? "miner" : "user") << " mode" << endl;
-		}
-		else
-			node.SendStringMessage(input);
+		node.PendingBlockCheck();
 	}
 
 	return 0;
