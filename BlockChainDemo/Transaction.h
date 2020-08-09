@@ -21,7 +21,7 @@ public:
 
 	string GetMessageString() const;
 
-	void RestTimeStamp(); // only for test
+	void ResetTimeStamp(); // only for test
 	void SetSignature(char* s) { signature = s; }
 
 	friend std::ostream& operator<<(std::ostream& out, const Transaction& b);
