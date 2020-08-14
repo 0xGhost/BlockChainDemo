@@ -50,7 +50,7 @@ bool Block::Verify(const unsigned int numOf0) const
 
 void Block::AddTransaction(Transaction t, bool resetTime)
 {
-	if (resetTime) t.RestTimeStamp();
+	if (resetTime) t.ResetTimeStamp();
 	data.push_back(t);
 }
 

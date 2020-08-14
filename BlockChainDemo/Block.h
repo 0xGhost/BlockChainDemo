@@ -36,7 +36,7 @@ private:
 	unsigned int index;
 	string timeStamp;
 	long long nonce;
-	vector<Transaction> data; // TODO: vector
+	vector<Transaction> data;
 	//string* prevHash;
 	Block* prevBlock;
 	string hash;

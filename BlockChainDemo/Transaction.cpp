@@ -30,7 +30,7 @@ string Transaction::GetMessageString() const
 	return message;
 }
 
-void Transaction::RestTimeStamp()
+void Transaction::ResetTimeStamp()
 {
 	timeStamp = TimeStamp();
 	oldOwner->Sign(*this); // fake sign

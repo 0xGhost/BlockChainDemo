@@ -435,7 +435,7 @@ int main()
 					case 1: t = &t2; break;
 					case 2: t = &t3; break;
 					}
-					t->RestTimeStamp();
+					t->ResetTimeStamp();
 					node.CollectNewTransaction(*t);
 					node.SendTransaction(*t);
 					//cout << *t << endl;
