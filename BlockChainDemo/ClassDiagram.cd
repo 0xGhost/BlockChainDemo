@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Block">
+    <Position X="0.5" Y="0.5" Width="5" />
+    <TypeIdentifier>
+      <HashCode>BIIcBAAAEAAAEQASAAEAAAAAAAAAAAAiAAASAAIBAAg=</HashCode>
+      <FileName>Block.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Blockchain">
+    <Position X="11.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQBAgQ=</HashCode>
+      <FileName>Blockchain.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeStamp">
+    <Position X="0.5" Y="5.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAgAAAEIAAAIAAAAAAAAAAAAAAAIAAAQAA=</HashCode>
+      <FileName>MSTimeStamp.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkNode">
+    <Position X="6.5" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AABDgAJEgAFAFAAAgAAIAIAAAAAKgAgAQAACIIAAAMA=</HashCode>
+      <FileName>NetworkNode.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Player">
+    <Position X="5.5" Y="9.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAABAABAAAAABAAAAEAAAAAAAAAQAABAA=</HashCode>
+      <FileName>Player.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RSATool">
+    <Position X="13.25" Y="5.25" Width="8" />
+    <TypeIdentifier>
+      <HashCode>IQgAQAIAAAAAAAAAAIAAAAAAAAgAAAABAAAAAAAAAAI=</HashCode>
+      <FileName>RSATool.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SHA256">
+    <Position X="11" Y="9.25" Width="4.75" />
+    <NestedTypes>
+      <Typedef Name="SHA256::uint8" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>SHA256.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="SHA256::uint32" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>SHA256.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="SHA256::uint64" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>SHA256.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAQASBAAAAAAAAQAAAAAAAQAgEQAIAAAAAAAAEAAA=</HashCode>
+      <FileName>SHA256.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Transaction">
+    <Position X="0.5" Y="9.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AICAAVAAEAABAUAAQAQAQAAAAAQAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Transaction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
